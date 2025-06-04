@@ -18,7 +18,7 @@
 */
 
 #include "analogexif.h"
-#include <QtGui/QApplication>
+#include <QApplication>
 
 #ifdef Q_WS_WIN32
 #include <QtPlugin>
