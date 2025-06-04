@@ -31,6 +31,13 @@ void GearListModel::reload()
 	setQuery(QString("SELECT GearName, id FROM UserGearItems WHERE GearType=%1 ORDER BY OrderBy").arg(gearType));
 }
 
+void GearListModel::setApplicable(bool applicable)
+{
+	isApplicable = applicable;
+	beginResetModel();
+	endResetModel();
+}
+
 int GearListModel::rowCount(const QModelIndex &index) const
 {
 	int i = QSqlQueryModel::rowCount(index.parent());

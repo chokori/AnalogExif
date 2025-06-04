@@ -63,6 +63,13 @@ void GearTreeModel::reload()
 	}
 }
 
+void GearTreeModel::setApplicable(bool applicable)
+{
+	isApplicable = applicable;
+	beginResetModel();
+	endResetModel();
+}
+
 // get number of camera bodies (gearType = 0)
 int GearTreeModel::bodyCount() const
 {
