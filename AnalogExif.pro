@@ -9,7 +9,9 @@ CONFIG += uic \
     thread \
     release
 QT += network \
-    sql
+    sql\
+	widgets\
+	concurrent
 UI_DIR = .
 LIBS += -lexiv2 \
     -lexpat
@@ -67,11 +69,11 @@ FORMS += analogexifoptions.ui \
     multitagvaluesdialog.ui \
     progressdialog.ui \
     tagnameeditdialog.ui \
-    aboutdialog_mac.ui \
-    analogexif_mac.ui \
-    editgear_mac.ui \
-    asciistringdialog_mac.ui \
-    asciitextdialog_mac.ui
+    aboutdialog.ui \
+    analogexif.ui \
+    editgear.ui \
+    asciistringdialog.ui \
+    asciitextdialog.ui
 SOURCES += aboutdialog.cpp \
     analogexif.cpp \
     analogexifoptions.cpp \

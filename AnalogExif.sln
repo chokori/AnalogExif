@@ -1,6 +1,8 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnalogExif", "AnalogExif.vcproj", "{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.36101.20
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnalogExif", "AnalogExif.vcxproj", "{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,19 +12,18 @@ Global
 		ReleaseDLL|Win32 = ReleaseDLL|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.Debug|Win32.Build.0 = Debug|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.DebugDLL|Win32.ActiveCfg = Debug|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.DebugDLL|Win32.Build.0 = Debug|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.Release|Win32.ActiveCfg = Release|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.Release|Win32.Build.0 = Release|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.ReleaseDLL|Win32.ActiveCfg = Release|Win32
-		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.ReleaseDLL|Win32.Build.0 = Release|Win32
+		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.Debug|Win32.ActiveCfg = Debug|x64
+		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.DebugDLL|Win32.ActiveCfg = Release|x64
+		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.DebugDLL|Win32.Build.0 = Release|x64
+		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.Release|Win32.ActiveCfg = Release|x64
+		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.ReleaseDLL|Win32.ActiveCfg = Release|x64
+		{8F11D1D4-AC78-4978-AFFD-8E29CD6D6E1D}.ReleaseDLL|Win32.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E0C389E-0674-478F-B9A1-AB08E4B4E19F}
 		QtVersion = 4.6.3
 	EndGlobalSection
 EndGlobal
