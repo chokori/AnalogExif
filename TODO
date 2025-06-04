@@ -1,0 +1,43 @@
+FUTURE FEATURES
+* database export/import (XML/CSV)
+* Linux support
+* Full Google Maps support
+* help
+* APEX-adjustment as tag flag
+* mark dirty fields in bold when editing gear template
+* native OS file explorer (could be impossible in Qt?)
+* completer/separate dialog and help on exif field names when editing gear templates
+* support XMP structures and LangAlt
+* show progress during backup
+* when failed to open new database and consequently fail to open previous db - ask to create new and revert to default
+* filter shown metadata
+? set proper XMP toolkit tag
+* when disabling custom namespace warn regarding affected equipment
+* multiple custom namespaces
+* change tool buttons in Mac to something else
+? Mac UI redesign
+* x64 support
+* write and read correct IPTC encoding
+* duplicate Exif/IPTC/XMP intersections
+
+DEVELOPMENT
+* auto-patch "About..." dialog with current version
+
+TESTS
+* verify against metadata corruption
+* test TIFF support
+* test proxy support
+* test Mac features
+
+BUGS
+* When typing long user-defined XMP schema prefix the Options dialog window resizes
+* Selection clears when finished editing meta data value in the gear template
+* Icon provider on the filelist sometimes caches icons
+* For selected empty directories "Auto-fill exposures" and "Copy metadata" actions are not disabled
+* memory leaks
+? for extra long comments metadataview changes appearance
+* incorrect setWindowModified() on main window
+* when copying metadata and destination is one file, copied tags flicker as "dirty" for a moment
+* when auto-filling exposure number and asking for backup - metadata of the changed file may be reflected in the metadata view
+* handle all unsuccessfull returns
+* when pasting Google map coordinates cursor should be on the first character to pass the validator
