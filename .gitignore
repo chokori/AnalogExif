@@ -1,3 +1,5 @@
+/release/
+/build/
 /.qmake.stash
 /.vs/
 /AnalogExif.nsh
@@ -25,3 +27,4 @@
 /AnalogExif.pro.user
 /exiv2.lib
 /libexpat.lib
+/AnalogExif.qtvscr

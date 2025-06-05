@@ -159,7 +159,7 @@ Qt::ItemFlags GearTreeModel::flags(const QModelIndex &index) const
 {
 	if((bodyCount() == 0) || !isApplicable)
 	{
-		return 0;
+		return Qt::ItemFlag::NoItemFlags;
 	}
 
 	return QStandardItemModel::flags(index);

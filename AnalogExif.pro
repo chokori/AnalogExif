@@ -7,7 +7,8 @@ DEPENDPATH += .
 INCLUDEPATH += .
 CONFIG += uic \
     thread \
-    release
+    release\
+	c++17
 QT += network \
     sql\
 	widgets\

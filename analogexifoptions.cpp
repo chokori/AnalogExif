@@ -22,8 +22,8 @@
 #include <QSqlError>
 #include <QMenu>
 #include <QNetworkProxy>
-#include <QRegExp>
-#include <QRegExpValidator>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 #include "exiftreemodel.h"
 
@@ -79,8 +79,8 @@ AnalogExifOptions::AnalogExifOptions(QWidget *parent)
 
 	tempContextMenu << ui.actionAdd_new_tag << ui.actionMove_up << ui.actionMove_down << separator << ui.actionDelete;
 
-	ui.userNsEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9$-_@\\.&+!*\"'(),=;/#?: %\\\\]*"), this));
-	ui.userNsPrefix->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9]*"), this));
+	ui.userNsEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9$-_@\\.&+!*\"'(),=;/#?: %\\\\]*"), this));
+	ui.userNsPrefix->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9]*"), this));
 
 	loadOptions();
 
@@ -90,7 +90,7 @@ AnalogExifOptions::AnalogExifOptions(QWidget *parent)
 	connect(verChecker, SIGNAL(newVersionAvailable(QString, QString, QDateTime, QString)), this, SLOT(newVersionAvailable(QString, QString, QDateTime, QString)));
 	connect(verChecker, SIGNAL(newVersionCheckError(QNetworkReply::NetworkError)), this, SLOT(newVersionCheckError(QNetworkReply::NetworkError)));
 
-	ui.proxyAddress->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9$-_@\\.&+!*\"'(),=;/#?: %\\\\]*"), this));
+	ui.proxyAddress->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9$-_@\\.&+!*\"'(),=;/#?: %\\\\]*"), this));
 
 	ui.buttonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 }

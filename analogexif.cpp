@@ -374,7 +374,7 @@ void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const 
 		{
 			QString selFolderName = dirViewModel->filePath(dirSorter->mapToSource(curDirIndex));
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-			fileViewModel->setFilter(0);
+			fileViewModel->setFilter(QDir::AllEntries);
 			ui.fileView->setRootIndex(fileSorter->mapFromSource(fileViewModel->setRootPath(selFolderName)));
 			fileViewModel->setFilter(QDir::Files);
 			QApplication::restoreOverrideCursor();
@@ -388,7 +388,7 @@ void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const 
 	else
 	{
 		// multiple selection, clear files view
-		fileViewModel->setFilter(0);
+		fileViewModel->setFilter(QDir::AllEntries);
 	}
 
 	// enable copy metadata if anything selected
@@ -511,7 +511,7 @@ void AnalogExif::fileView_selectionChanged(const QItemSelection&, const QItemSel
             loadPreview(curFileName);
             QApplication::restoreOverrideCursor();
 #else
-			QFuture<void> future = QtConcurrent::run(this, &AnalogExif::loadPreview, curFileName);
+			QFuture<void> future = QtConcurrent::run(&AnalogExif::loadPreview, this, curFileName);
 #endif
 			exifTreeModel->setReadonly(false);
 
@@ -575,7 +575,7 @@ void AnalogExif::on_dirView_clicked(const QModelIndex& index)
 void AnalogExif::openLocation(QString path)
 {
 	// if valid selection - enable equipment apply
-	bool validSelection = ui.gearView->selectionModel()->hasSelection() | ui.filmView->selectionModel()->hasSelection() | ui.developerView->selectionModel()->hasSelection() | ui.authorView->selectionModel()->hasSelection();
+	bool validSelection = ui.gearView->selectionModel()->hasSelection() || ui.filmView->selectionModel()->hasSelection() || ui.developerView->selectionModel()->hasSelection() || ui.authorView->selectionModel()->hasSelection();
 	ui.actionApply_gear->setEnabled(validSelection);
 	ui.applyGearBtn->setEnabled(validSelection);
 
@@ -623,7 +623,7 @@ void AnalogExif::openLocation(QString path)
 		loadPreview(curFileName);
 		QApplication::restoreOverrideCursor();
 #else
-		QFuture<void> future = QtConcurrent::run(this, &AnalogExif::loadPreview, curFileName);
+		QFuture<void> future = QtConcurrent::run(&AnalogExif::loadPreview, this, curFileName);
 #endif
 		// directory index
 		curDirIndex = dirSorter->mapFromSource(dirViewModel->index(fileInfo.path()));
@@ -696,7 +696,7 @@ void AnalogExif::previewUpdate()
 void AnalogExif::resizeEvent(QResizeEvent *)
 {
 	// rescale the pixmap
-	if(!ui.filePreview->pixmap()->isNull())
+	if(!ui.filePreview->pixmap().isNull())
 	{
 		QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
 		ui.filePreview->setPixmap(filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio));
@@ -752,32 +752,33 @@ bool AnalogExif::createBackup(QString filename, bool singleFile, QMessageBox::St
 		}
 		if((res == QMessageBox::Yes) || (res == QMessageBox::YesToAll))
 		{
-			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+			///TODO 20250605
+			//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-			QTime timer;
-			ProgressDialog progress(tr("Creating backup"), "Please wait...", "", this, 0, 100);
-			QFuture<bool> future = QtConcurrent::run(&QFile::copy, filename, filename + ".bak");
-			progress.setValue(0);
+			//QElapsedTimer timer;
+			//ProgressDialog progress(tr("Creating backup"), "Please wait...", "", this, 0, 100);
+			////QFuture<bool> future = QtConcurrent::run(QFile::copy, filename, filename + ".bak");
+			//progress.setValue(0);
 
-			while(!future.isFinished())
-			{
-				if((timer.elapsed() > 500) && (!progress.isVisible()))
-					progress.show();
+			//while(!future.isFinished())
+			//{
+			//	if((timer.elapsed() > 500) && (!progress.isVisible()))
+			//		progress.show();
 
-				progress.setValue(timer.elapsed() / 1000);
+			//	progress.setValue(timer.elapsed() / 1000);
 
-				QCoreApplication::processEvents();
-				QCoreApplication::sendPostedEvents();
-			}
+			//	QCoreApplication::processEvents();
+			//	QCoreApplication::sendPostedEvents();
+			//}
 
-			QApplication::restoreOverrideCursor();
+			//QApplication::restoreOverrideCursor();
 
-			if(!future)
-			{
-				QMessageBox::critical(this, tr("Save error"), tr("Unable to create backup file:\n%1.").arg(QDir::toNativeSeparators(filename + ".bak")));
+			//if(!future)
+			//{
+			//	QMessageBox::critical(this, tr("Save error"), tr("Unable to create backup file:\n%1.").arg(QDir::toNativeSeparators(filename + ".bak")));
 	
-				return false;
-			}
+			//	return false;
+			//}
 		}
 		prevResult = res;
 	}
@@ -818,7 +819,7 @@ bool AnalogExif::save()
 		return false;
 
 	ProgressDialog progress(tr("Saving metadata..."), "", tr("Cancel"), this, 0, fileNames.count());
-	QTime time;
+	QElapsedTimer time;
 	time.start();
 
 	int filesProcessed = 0;
@@ -840,7 +841,7 @@ bool AnalogExif::save()
 			return false;
 
 		// save metadata in another thread, do not replace
-		QFuture<bool> future = QtConcurrent::run(exifTreeModel, &ExifTreeModel::saveFile, fName, false);
+		QFuture<bool> future = QtConcurrent::run(&ExifTreeModel::saveFile, exifTreeModel, fName, false);
 
 		while(!future.isFinished())
 		{
@@ -1035,7 +1036,7 @@ void AnalogExif::on_developerView_doubleClicked(const QModelIndex& index)
 // film or gear selected - enable "apply gear" button
 void AnalogExif::filmAndGearView_selectionChanged(const QItemSelection&, const QItemSelection&)
 {
-	bool validSelection = ui.gearView->selectionModel()->hasSelection() | ui.filmView->selectionModel()->hasSelection() | ui.developerView->selectionModel()->hasSelection() | ui.authorView->selectionModel()->hasSelection();
+	bool validSelection = ui.gearView->selectionModel()->hasSelection() || ui.filmView->selectionModel()->hasSelection() || ui.developerView->selectionModel()->hasSelection() || ui.authorView->selectionModel()->hasSelection();
 	ui.actionApply_gear->setEnabled(validSelection);
 	ui.applyGearBtn->setEnabled(validSelection);
 
@@ -1523,11 +1524,11 @@ QStringList AnalogExif::getFileList(QModelIndexList selIdx, bool includeDirs, bo
 	filesFound = 0;
 
 	ProgressDialog progress(tr("Scanning subfolders..."), tr("Files found: 0"), tr("Cancel"), this, 0, 500);
-	QTime timer;
+	QElapsedTimer timer;
 
 	timer.start();
 
-	QFuture<QStringList> future = QtConcurrent::run(this, &AnalogExif::scanSubfolders, selIdx, includeDirs);
+	QFuture<QStringList> future = QtConcurrent::run(&AnalogExif::scanSubfolders, this, selIdx, includeDirs);
 
 	int newFilesFound = 0;
 	progress.setValue(0);
@@ -1624,7 +1625,7 @@ void AnalogExif::on_actionAuto_fill_exposure_triggered(bool)
 
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-			QFuture<bool> future = QtConcurrent::run(exifTreeModel, &ExifTreeModel::setExposureNumber, fileName, sortedFiles.at(i+1).toInt());
+			QFuture<bool> future = QtConcurrent::run(&ExifTreeModel::setExposureNumber, exifTreeModel, fileName, sortedFiles.at(i+1).toInt());
 
 			while(!future.isFinished())
 			{
@@ -1751,7 +1752,7 @@ void AnalogExif::on_actionRemove_triggered(bool)
 		return;
 
 	ProgressDialog progress(tr("Deleting files..."), tr("Deleting"), tr("Cancel"), this, 0, fileNames.count());
-	QTime timer;
+	QElapsedTimer timer;
 
 	timer.start();
 
@@ -1863,7 +1864,7 @@ void AnalogExif::on_action_Copy_metadata_triggered(bool)
 			}
 
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-			QFuture<bool> future = QtConcurrent::run(exifTreeModel, &ExifTreeModel::mergeMetadata, fName, data);
+			QFuture<bool> future = QtConcurrent::run(&ExifTreeModel::mergeMetadata, exifTreeModel,fName, data);
 
 			while(!future.isFinished())
 			{

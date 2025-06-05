@@ -118,7 +118,7 @@ Qt::ItemFlags GearListModel::flags(const QModelIndex &index) const
 
 	if((nRows == 0) || !isApplicable)
 	{
-		return 0;
+		return Qt::ItemFlag::NoItemFlags;
 	}
 
 	return QSqlQueryModel::flags(index);

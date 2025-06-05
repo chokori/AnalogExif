@@ -3357,30 +3357,4 @@
 			</FileConfiguration>
 		</File>
 	</Files>
-	<Globals>
-		<Global
-			Name="lupdateOnBuild"
-			Value="0"
-		/>
-		<Global
-			Name="MocDir"
-			Value=".\$(ConfigurationName)"
-		/>
-		<Global
-			Name="MocOptions"
-			Value=""
-		/>
-		<Global
-			Name="QtVersion Win32"
-			Value="4.6.3"
-		/>
-		<Global
-			Name="RccDir"
-			Value="."
-		/>
-		<Global
-			Name="UicDir"
-			Value="."
-		/>
-	</Globals>
 </VisualStudioProject>
