@@ -176,8 +176,9 @@ QVariantList CheckedExifTreeModel::getCheckedTags()
 		{
 			ExifItem* tag = category->child(j);
 
-			if(tag->isChecked())
-				checkedValues << qVariantFromValue((void*)tag);
+			if (tag->isChecked()) {
+				checkedValues << QVariant::fromValue((void*)tag);
+			}
 		}
 	}
 

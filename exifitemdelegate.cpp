@@ -27,8 +27,8 @@
 
 #include <QComboBox>
 #include <QLineEdit>
-#include <QRegExp>
-#include <QRegExpValidator>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <QPlainTextEdit>
@@ -175,7 +175,7 @@ QWidget* ExifItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 		{
 			QLineEdit* edit = new QLineEdit(parent);
 
-			edit->setValidator(new QRegExpValidator(QRegExp("(\\+|\\-)?(\\d+\\s)?\\d+/\\d+"), edit));
+			edit->setValidator(new QRegularExpressionValidator(QRegularExpression("(\\+|\\-)?(\\d+\\s)?\\d+/\\d+"), edit));
 			//edit->setFrame(false);
 
 			return edit;
@@ -210,7 +210,7 @@ QWidget* ExifItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 			}
 
 			combo->setEditable(true);
-			combo->setValidator(new QRegExpValidator(QRegExp("(\\d+/\\d+|\\d*\\.\\d+)"), combo));
+			combo->setValidator(new QRegularExpressionValidator(QRegularExpression("(\\d+/\\d+|\\d*\\.\\d+)"), combo));
 			combo->setCompleter(0);
 			//combo->setFrame(false);
 
@@ -678,7 +678,7 @@ void ExifItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			if(text.contains(' '))
 			{
 				// x y/z format
-				QStringList str = text.split(' ', QString::SkipEmptyParts);
+				QStringList str = text.split(' ', Qt::SkipEmptyParts);
 				
 				wholePart = str.at(0).toInt(&ok);
 				if(!ok)
@@ -700,7 +700,7 @@ void ExifItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			if(text.contains('/'))
 			{
 				// x/y format
-				QStringList ratioStr = text.split('/', QString::SkipEmptyParts);
+				QStringList ratioStr = text.split('/', Qt::SkipEmptyParts);
 
 				QVariantList rational;
 				// all checks should be done by validator, but it doesn't work
@@ -739,7 +739,7 @@ void ExifItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			if(text.contains('/'))
 			{
 				// x/y format
-				QStringList ratioStr = text.split('/', QString::SkipEmptyParts);
+				QStringList ratioStr = text.split('/', Qt::SkipEmptyParts);
 
 				QVariantList rational;
 				// all checks should be done by validator, but it doesn't work
@@ -1015,14 +1015,14 @@ GpsLineEdit::GpsLineEdit(QWidget* parent) : QLineEdit(parent)
 	setInputMask("#99\u00B0 99' 99.999\" #999\u00B0 99' 99.999\"");
 	defaultValue = "+00\u00B0 00' 00.000\" +000\u00B0 00' 00.000\"";
 	setText(defaultValue);
-	setValidator(new QRegExpValidator(QRegExp("(\\+|\\-){1}\\d{2}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\" (\\+|\\-){1}\\d{3}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\""), this));
+	setValidator(new QRegularExpressionValidator(QRegularExpression("(\\+|\\-){1}\\d{2}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\" (\\+|\\-){1}\\d{3}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\""), this));
 }
 
 GpsLineEdit::GpsLineEdit(const QString& contents, QWidget* parent) : QLineEdit(contents, parent), defaultValue(contents)
 {
 	// setFrame(false);
 	setInputMask("#99\u00B0 99' 99.999\" #999\u00B0 99' 99.999\"");
-	setValidator(new QRegExpValidator(QRegExp("(\\+|\\-){1}\\d{2}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\" (\\+|\\-){1}\\d{3}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\""), this));
+	setValidator(new QRegularExpressionValidator(QRegularExpression("(\\+|\\-){1}\\d{2}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\" (\\+|\\-){1}\\d{3}\u00B0 \\d{2}' \\d{2}\\.\\d{3}\""), this));
 }
 
 void GpsLineEdit::paste()
@@ -1033,30 +1033,31 @@ void GpsLineEdit::paste()
     QString clip = QApplication::clipboard()->text(QClipboard::Clipboard);
     if (!clip.isEmpty() || hasSelectedText()) {
 		// "+xx xx' xx.xxx" +xxx xx' xx.xxx" format
-		QRegExp regEx("(\\+|\\-)?(\\d{1,2})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\"\\s*\\,?\\s*(\\+|\\-)?(\\d{1,3})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\"");
+		QRegularExpression regEx("(\\+|\\-)?(\\d{1,2})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\"\\s*\\,?\\s*(\\+|\\-)?(\\d{1,3})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\"");
 		QStringList caps;
 
-		if(regEx.indexIn(clip) != -1)
+		QRegularExpressionMatch match = regEx.match(clip);
+		if(match.hasMatch())
 		{
-			caps = regEx.capturedTexts();
+			caps = match.capturedTexts();
 
 			if(caps.size() == 9)
 			{
 				// North/South
-				if(regEx.cap(1) == "-")
+				if(match.captured(1) == "-")
 					result += "-";
 				else
 					result += "+";
 
-				result += QString("%1\u00B0 %2' %3\" ").arg(regEx.cap(2)).arg(regEx.cap(3)).arg(regEx.cap(4));
+				result += QString("%1\u00B0 %2' %3\" ").arg(match.captured(2)).arg(match.captured(3)).arg(match.captured(4));
 
 				// East/West
-				if(regEx.cap(5) == "-")
+				if(match.captured(5) == "-")
 					result += "-";
 				else
 					result += "+";
 
-				result += QString("%1\u00B0 %2' %3\" ").arg(regEx.cap(6), 3, QChar('0')).arg(regEx.cap(7)).arg(regEx.cap(8));
+				result += QString("%1\u00B0 %2' %3\" ").arg(match.captured(6), 3, QChar('0')).arg(match.captured(7)).arg(match.captured(8));
 
 				insert(result);
 				return;
@@ -1065,14 +1066,15 @@ void GpsLineEdit::paste()
 
 		// match "+xx.xxxxxx, +xxx.xxxxxx" format
 		regEx.setPattern("(\\+|\\-)?(\\d{1,2}(?:\\.\\d{1,10})?){1}\\s*\\,?\\s*(\\+|\\-)?(\\d{1,2}(?:\\.\\d{1,10})?){1}");
-		if(regEx.indexIn(clip) != -1)
+		match = regEx.match(clip);
+		if(match.hasMatch())
 		{
-			caps = regEx.capturedTexts();
+			caps = match.capturedTexts();
 
 			if(caps.size() == 5)
 			{
 				// North/South
-				if(regEx.cap(1) == "-")
+				if(match.captured(1) == "-")
 					result += "-";
 				else
 					result += "+";
@@ -1080,18 +1082,18 @@ void GpsLineEdit::paste()
 				// latitude
 				int d, m;
 				double s;
-				ExifUtils::doubleToDegrees(regEx.cap(2).toDouble(), d, m, s);
+				ExifUtils::doubleToDegrees(match.captured(2).toDouble(), d, m, s);
 
 				result += QString("%1\u00B0 %2' %3\" ").arg(d, 2, 10, QChar('0')).arg(m, 2, 10, QChar('0')).arg(s, 2, 'f', 3, QChar('0'));
 
 				// East/West
-				if(regEx.cap(3) == "-")
+				if(match.captured(3) == "-")
 					result += "-";
 				else
 					result += "+";
 
 				// latitude
-				ExifUtils::doubleToDegrees(regEx.cap(4).toDouble(), d, m, s);
+				ExifUtils::doubleToDegrees(match.captured(4).toDouble(), d, m, s);
 
 				result += QString("%1\u00B0 %2' %3\"").arg(d, 3, 10, QChar('0')).arg(m, 2, 10, QChar('0')).arg(s, 2, 'f', 3, QChar('0'));
 

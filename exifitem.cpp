@@ -20,6 +20,7 @@
 #include "exifitem.h"
 #include <QStringList>
 #include <QDateTime>
+#include <QRegularExpression>
 
 #include "exifutils.h"
 #include <cmath>
@@ -298,7 +299,7 @@ QString ExifItem::valueToString(const QVariant& value, TagType type, const QVari
 
 			if((oldValue != QVariant()) && (oldValue.toString() != ""))
 			{
-				QStringList ratioStr = oldValue.toString().split('/', QString::SkipEmptyParts);
+				QStringList ratioStr = oldValue.toString().split('/', Qt::SkipEmptyParts);
 				
 				bool ok = false;
 
@@ -337,7 +338,7 @@ QString ExifItem::valueToString(const QVariant& value, TagType type, const QVari
 			QVariantList rational = value.toList();
 
 			if(rational == QVariantList())
-				return false;
+				return QString();
 
 			valStr = QString("%1/%2").arg(rational.at(0).toInt()).arg(rational.at(1).toInt());
 			break;
@@ -358,7 +359,7 @@ QVariant ExifItem::valueToString(const QVariant& value, TagType type, const QStr
 	case TagText:
 	case TagGPS:
 		if(role == Qt::DisplayRole)
-			return formatString.arg(value.toString()).replace(QRegExp("(\r|\n)"), " ");
+			return formatString.arg(value.toString()).replace(QRegularExpression("(\r|\n)"), " ");
 		else if(role == Qt::EditRole)
 			return value;
 		break;
@@ -435,7 +436,7 @@ QVariant ExifItem::valueFromString(const QString& value, TagType type, bool conv
 		QVariantList values;
 
 		// split the values
-		QStringList strValues = value.split("&&", QString::SkipEmptyParts);
+		QStringList strValues = value.split("&&", Qt::SkipEmptyParts);
 
 		// convert each value individually
 		foreach(QString strVal, strValues)
@@ -488,7 +489,7 @@ QVariant ExifItem::valueFromString(const QString& value, TagType type, bool conv
 					return QVariant();
 			}
 
-			QStringList ratioStr = value.split('/', QString::SkipEmptyParts);
+			QStringList ratioStr = value.split('/', Qt::SkipEmptyParts);
 
 			if(ratioStr.count() < 2)
 				return QVariant();
@@ -509,7 +510,7 @@ QVariant ExifItem::valueFromString(const QString& value, TagType type, bool conv
 	case TagFraction:
 	case TagShutter:
 		{
-			QStringList ratioStr = value.split('/', QString::SkipEmptyParts);
+			QStringList ratioStr = value.split('/', Qt::SkipEmptyParts);
 
 			if(ratioStr.count() < 2)
 				return QVariant();
@@ -544,11 +545,11 @@ QList<QVariantList> ExifItem::parseEncodedChoiceList(QString list, TagType dataT
 {
 	QList<QVariantList> res;
 
-	QStringList items = list.split(";;", QString::SkipEmptyParts);
+	QStringList items = list.split(";;", Qt::SkipEmptyParts);
 
 	foreach(QString itemPair, items)
 	{
-		QStringList values = itemPair.split("||", QString::SkipEmptyParts);
+		QStringList values = itemPair.split("||", Qt::SkipEmptyParts);
 		if(values.count() != 2)
 			return QList<QVariantList>();
 
@@ -563,11 +564,11 @@ QList<QVariantList> ExifItem::parseEncodedChoiceList(QString list, TagType dataT
 
 QString ExifItem::findChoiceTextByValue(QString list, QVariant value, TagType dataType, TagFlags flags)
 {
-	QStringList items = list.split(";;", QString::SkipEmptyParts);
+	QStringList items = list.split(";;", Qt::SkipEmptyParts);
 
 	foreach(QString itemPair, items)
 	{
-		QStringList values = itemPair.split("||", QString::SkipEmptyParts);
+		QStringList values = itemPair.split("||", Qt::SkipEmptyParts);
 		if(values.count() != 2)
 			return QString();
 

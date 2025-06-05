@@ -32,7 +32,7 @@
 Qt::ItemFlags EditGearTagsModel::flags(const QModelIndex &index) const
 {
 	if(!index.isValid())
-		return 0;
+		return Qt::ItemFlag::NoItemFlags;
 
 	if(index.column() == 1)
 		return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -45,20 +45,25 @@ QVariant EditGearTagsModel::data(const QModelIndex &index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if(!query().seek(index.row()))
+	//if(!query().seek(index.row()))
+	//	return QVariant();
+	
+	if(record(index.row()).isEmpty())
 		return QVariant();
 
+	QSqlRecord rec = record(index.row());
+	
 	// return tag text for column 0
 	if((index.column() == 0)  && (role == Qt::DisplayRole))
-		return query().value(0).toString();
+		return rec.value(0).toString();
 
-	ExifItem::TagType tagType = (ExifItem::TagType)query().value(2).toInt();
-	QString formatString = query().value(3).toString();
-	ExifItem::TagFlags tagFlags = (ExifItem::TagFlags)query().value(5).toInt();
+	ExifItem::TagType tagType = (ExifItem::TagType)rec.value(2).toInt();
+	QString formatString = rec.value(3).toString();
+	ExifItem::TagFlags tagFlags = (ExifItem::TagFlags)rec.value(5).toInt();
 
 	// return tag id
 	if(role == GetTagIdRole)
-		return query().value(4);
+		return rec.value(4);
 
 	if(index.column() == 1)
 	{
@@ -88,11 +93,19 @@ bool EditGearTagsModel::setData(const QModelIndex &index, const QVariant &dataVa
 	if (role != Qt::EditRole)
 		return false;
 
-	if(!query().seek(index.row()))
+	//if(!query().seek(index.row()))
+	//	return false;
+
+	if(record(index.row()).isEmpty())
 		return false;
 
-	ExifItem::TagType tagType = (ExifItem::TagType)query().value(2).toInt();
-	ExifItem::TagFlags tagFlags = (ExifItem::TagFlags)query().value(5).toInt();
+	QSqlRecord rec = record(index.row());
+	
+	ExifItem::TagType tagType = (ExifItem::TagType)rec.value(2).toInt();
+	ExifItem::TagFlags tagFlags = (ExifItem::TagFlags)rec.value(5).toInt();
+
+	//ExifItem::TagType tagType = (ExifItem::TagType)query().value(2).toInt();
+	//ExifItem::TagFlags tagFlags = (ExifItem::TagFlags)query().value(5).toInt();
 
 	// return value according to the tag type
 	QString updateValue;

@@ -38,7 +38,7 @@ public slots:
 protected:
 	virtual bool edit(const QModelIndex &index, EditTrigger trigger, QEvent *event)
 	{
-		if(index.isValid() && (index.column() == 1) && (trigger == QAbstractItemView::EditKeyPressed))
+		if(index.isValid() && (index.column() == 1) && (trigger == EditTrigger::EditKeyPressed))
 			emit doubleClicked(index);
 
 		return QTreeView::edit(index, trigger, event);

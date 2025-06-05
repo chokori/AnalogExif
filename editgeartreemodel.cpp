@@ -91,7 +91,7 @@ QModelIndex EditGearTreeModel::reload(int id)
 
 		resultIndex->setData(f, Qt::FontRole);
 
-		resultIndex->setFlags(0);
+		resultIndex->setFlags(Qt::ItemFlag::NoItemFlags);
 
 		invisibleRootItem()->appendRow(resultIndex);
 	}
@@ -114,7 +114,7 @@ QMimeData* EditGearTreeModel::mimeData(const QModelIndexList &indexes) const
 	QMimeData *mimeData = new QMimeData();
 	QByteArray encodedData;
 
-	QDataStream stream(&encodedData, QIODevice::WriteOnly);
+	QDataStream stream(&encodedData, QIODeviceBase::WriteOnly);
 
 	foreach (QModelIndex index, indexes) {
 		if (index.isValid()) {
@@ -152,7 +152,7 @@ bool EditGearTreeModel::dropMimeData(const QMimeData *data, Qt::DropAction actio
 	}
 
 	QByteArray encodedData = data->data("application/analogexif.gearlist");
-	QDataStream stream(&encodedData, QIODevice::ReadOnly);
+	QDataStream stream(&encodedData, QIODeviceBase::ReadOnly);
 
 	QSqlQuery query;
 
