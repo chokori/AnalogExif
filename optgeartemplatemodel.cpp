@@ -25,6 +25,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QStringList>
+#include <QRegularExpression>
 
 void OptGearTemplateModel::reload(int id)
 {
@@ -34,13 +35,12 @@ void OptGearTemplateModel::reload(int id)
 
 Qt::ItemFlags OptGearTemplateModel::flags(const QModelIndex &index) const
 {
-	if(!index.isValid())
-		return 0;
+	if (!index.isValid())
+		return Qt::ItemFlag::NoItemFlags;
 
 	// protect minimum db setup
-
-	if(!query().seek(index.row()))
-		return 0;
+	if (record(index.row()).isEmpty())
+		return Qt::ItemFlag::NoItemFlags;
 
 	if(ProtectBuiltInTags && ((ExifItem::TagFlags)query().value(5).toInt()).testFlag(ExifItem::Protected))
 	{
@@ -73,49 +73,51 @@ QVariant OptGearTemplateModel::data(const QModelIndex &index, int role) const
 
 	if(role == GetTagId)
 	{
-		if(!query().seek(index.row()))
+		if (record(index.row()).isEmpty())
 			return QVariant();
 
-		return query().value(6).toInt();
+		return record(index.row()).value(6).toInt();
 	}
 
 	if(role == GetTagFlagsRole)
 	{
-		if(!query().seek(index.row()))
+		if (record(index.row()).isEmpty())
 			return QVariant();
 
-		return query().value(5).toInt();
+		return record(index.row()).value(5).toInt();
 	}
 
 	if(role == GetAltTagRole)
 	{
-		if(!query().seek(index.row()))
+		if (record(index.row()).isEmpty())
 			return QVariant();
 
-		return query().value(8).toString();
+		return record(index.row()).value(8).toInt();
 	}
 
 	if(role == GetTagTypeRole)
 	{
-		if(!query().seek(index.row()))
+		if (record(index.row()).isEmpty())
 			return QVariant();
 
-		return query().value(3).toInt();
+		return record(index.row()).value(3).toInt();
 	}
 
 	QVariant v = QSqlQueryModel::data(index, role);
 
 	if(((role == Qt::ToolTipRole) || (role == Qt::DisplayRole)) && (index.column() == 1))
 	{
-		if(!query().seek(index.row()))
+		if (record(index.row()).isEmpty())
 			return QVariant();
 
-		QString text = query().value(1).toString();
+		QSqlRecord rec = record(index.row());
 
-		if(((ExifItem::TagFlags)query().value(5).toInt()).testFlag(ExifItem::AsciiAlt))
+		QString text = rec.value(1).toString();
+
+		if(((ExifItem::TagFlags)rec.value(5).toInt()).testFlag(ExifItem::AsciiAlt))
 		{
-			if(query().value(8).toString() != "")
-				text += " (" + query().value(8).toString() + ")";
+			if(rec.value(8).toString() != "")
+				text += " (" + rec.value(8).toString() + ")";
 		}
 
 		return text;
@@ -216,14 +218,16 @@ bool OptGearTemplateModel::setData(const QModelIndex &index, const QVariant &val
 	if (role != Qt::EditRole)
 		return false;
 
-	if(!query().seek(index.row()))
+	if (record(index.row()).isEmpty())
 		return false;
 
-	int id = query().value(6).toInt();
+	QSqlRecord rec = record(index.row());
+
+	int id = rec.value(6).toInt();
 
 	if(value == QVariant())
 	{
-		if((index.column() == 1) && query().value(1).toString().isEmpty())
+		if((index.column() == 1) && rec.value(1).toString().isEmpty())
 		{
 			// remove cancelled tag
 			removeTag(index);
@@ -232,7 +236,6 @@ bool OptGearTemplateModel::setData(const QModelIndex &index, const QVariant &val
 		return false;
 	}
 
-	// update the record
 	QString queryStr;
 
 	if(index.column() == 0)
@@ -271,11 +274,11 @@ bool OptGearTemplateModel::setData(const QModelIndex &index, const QVariant &val
 					}
 				}
 
-				queryStr += QString("TagName = '%1', Flags = %2").arg(vallist.at(0).toString().remove(QRegExp("(\\s?)")).replace("'", "''")).arg(vallist.at(1).toInt());
+				queryStr += QString("TagName = '%1', Flags = %2").arg(vallist.at(0).toString().remove(QRegularExpression("(\\s?)")).replace("'", "''")).arg(vallist.at(1).toInt());
 
 				if(((ExifItem::TagFlags)vallist.at(1).toInt()).testFlag(ExifItem::AsciiAlt))
 				{
-					queryStr += QString(", AltTag = '%1'").arg(vallist.at(2).toString().remove(QRegExp("(\\s?)")).replace("'", "''"));
+					queryStr += QString(", AltTag = '%1'").arg(vallist.at(2).toString().remove(QRegularExpression("(\\s?)")).replace("'", "''"));
 				}
 				else
 				{
@@ -389,18 +392,22 @@ void OptGearTemplateModel::swapOrderBys(const QModelIndex& idx1, const QModelInd
 		return;
 
 	// get id and orderby values of the first index
-	if(!query().seek(idx1.row()))
+	if (record(idx1.row()).isEmpty())
 		return;
 
-	int tagId1 = query().value(7).toInt();
-	int orderBy1 = query().value(0).toInt();
+	QSqlRecord rec1 = record(idx1.row());
+
+	int tagId1 = rec1.value(7).toInt();
+	int orderBy1 = rec1.value(0).toInt();
 
 	// get id and orderby values of the second index
-	if(!query().seek(idx2.row()))
+	if (record(idx2.row()).isEmpty())
 		return;
 
-	int tagId2 = query().value(7).toInt();
-	int orderBy2 = query().value(0).toInt();
+	QSqlRecord rec2 = record(idx1.row());
+
+	int tagId2 = rec2.value(7).toInt();
+	int orderBy2 = rec2.value(0).toInt();
 
 	// update database
 	QSqlQuery updQuery(QString("UPDATE GearTemplate SET OrderBy = %1 WHERE id = %2").arg(orderBy2).arg(tagId1));
