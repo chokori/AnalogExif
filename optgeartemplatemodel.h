@@ -21,6 +21,7 @@
 #define OPTGEARTEMPLATEMODEL_H
 
 #include <QSqlQueryModel>
+#include <QSqlRecord>
 #include "exifitem.h"
 
 class OptGearTemplateModel : public QSqlQueryModel
@@ -28,7 +29,7 @@ class OptGearTemplateModel : public QSqlQueryModel
 	Q_OBJECT
 
 public:
-	OptGearTemplateModel(QObject *parent) : QSqlQueryModel(parent) { }
+	OptGearTemplateModel(QObject *parent) : QSqlQueryModel(parent), gearId(-1) { }
 	
 	QVariant data(const QModelIndex &index, int role) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

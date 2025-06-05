@@ -23,8 +23,8 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QRegExp>
-#include <QRegExpValidator>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 TagNameEditDialog::TagNameEditDialog(QWidget *parent, const QString& tagNames, ExifItem::TagFlags, const QString& altTags)
 	: QDialog(parent), altTagNames(NULL)
@@ -32,7 +32,7 @@ TagNameEditDialog::TagNameEditDialog(QWidget *parent, const QString& tagNames, E
 	ui.setupUi(this);
 
 	ui.tagNamesEdit->setText(tagNames);
-	ui.tagNamesEdit->setValidator(new QRegExpValidator(QRegExp("(((Exif|Iptc|Xmp)\\.([a-zA-Z0-9])+\\.([a-zA-Z0-9])+)\\s*(\\,?\\s*)?)+"), this));
+	ui.tagNamesEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("(((Exif|Iptc|Xmp)\\.([a-zA-Z0-9])+\\.([a-zA-Z0-9])+)\\s*(\\,?\\s*)?)+"), this));
 
 	for(int i = 1; i < ExifItem::Last; i *= 2)
 	{
@@ -47,7 +47,7 @@ TagNameEditDialog::TagNameEditDialog(QWidget *parent, const QString& tagNames, E
 			altTagNames = new QLineEdit(ui.optionsBox);
 			altTagNames->setEnabled(false);
 			altTagNames->setText(altTags);
-			altTagNames->setValidator(new QRegExpValidator(QRegExp("(((Exif|Iptc|Xmp)\\.([a-zA-Z0-9])+\\.([a-zA-Z0-9])+)\\s*(\\,?\\s*)?)+"), this));
+			altTagNames->setValidator(new QRegularExpressionValidator(QRegularExpression("(((Exif|Iptc|Xmp)\\.([a-zA-Z0-9])+\\.([a-zA-Z0-9])+)\\s*(\\,?\\s*)?)+"), this));
 
 			altTagCbox = cbx;
 
@@ -82,7 +82,7 @@ void TagNameEditDialog::setFlags(ExifItem::TagFlags flags)
 
 ExifItem::TagFlags TagNameEditDialog::getFlags() const
 {
-	ExifItem::TagFlags flags = 0;
+	ExifItem::TagFlags flags = ExifItem::TagFlag::None;
 
 	for(int i = 1, j = 0; i < ExifItem::Last; i *= 2, j++)
 	{
@@ -104,7 +104,7 @@ void TagNameEditDialog::on_buttonBox_accepted()
 	}
 
 	// browse through tags and verify them
-	QStringList tags = ui.tagNamesEdit->text().remove(QRegExp("(\\s?)")).split(",", QString::SkipEmptyParts);
+	QStringList tags = ui.tagNamesEdit->text().remove(QRegularExpression("(\\s?)")).split(",", Qt::SkipEmptyParts);
 	foreach(QString tag, tags)
 	{
 		if(!ExifTreeModel::tagSupported(tag))
@@ -120,7 +120,7 @@ void TagNameEditDialog::on_buttonBox_accepted()
 	// if alternative tag set, verify them as well
 	if(altTagNames && altTagNames->isEnabled())
 	{
-		tags = altTagNames->text().remove(QRegExp("(\\s?)")).split(",", QString::SkipEmptyParts);
+		tags = altTagNames->text().remove(QRegularExpression("(\\s?)")).split(",", Qt::SkipEmptyParts);
 		foreach(QString tag, tags)
 		{
 			if(!ExifTreeModel::tagSupported(tag))
