@@ -102,7 +102,7 @@ public:
 	 QByteArray* getPreview() const;
 
 	// Exif UTF-QString conversion
-	static Exiv2::Value::AutoPtr QStringToExifUtf(QString qstr, bool addUnicodeMarker = false, bool isUtf8 = false, Exiv2::TypeId typeId = Exiv2::unsignedByte);
+	static Exiv2::Value::UniquePtr QStringToExifUtf(QString qstr, bool addUnicodeMarker = false, bool isUtf8 = false, Exiv2::TypeId typeId = Exiv2::unsignedByte);
 	static void QStringToExifUtf(Exiv2::Value& v, QString qstr, bool addUnicodeMarker = false, bool isUtf8 = false, Exiv2::TypeId typeId = Exiv2::unsignedByte);
 	static QString ExifUtfToQString(const Exiv2::Value& exifData, bool checkForMarker = false, bool isUtf8 = false);
 
@@ -120,7 +120,7 @@ protected:
 
 	// read exif values into the model
 	bool readMetaValues();
-	bool readMetaValues(Exiv2::Image::AutoPtr& exivHandle);
+	bool readMetaValues(Exiv2::Image::UniquePtr& exivHandle);
 
 	bool prepareMetadata(Exiv2::ExifData& exifData, Exiv2::IptcData& iptcData, Exiv2::XmpData& xmpData);
 
@@ -160,7 +160,7 @@ protected:
 	// extra tags string
 	QString etagsString;
 
-	Exiv2::Image::AutoPtr exifHandle;
+	Exiv2::Image::UniquePtr exifHandle;
 
 	Exiv2::ExifData curExifData;
 	Exiv2::IptcData curIptcData;

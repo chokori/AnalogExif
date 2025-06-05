@@ -27,6 +27,7 @@
 #include <QFont>
 #include <QBrush>
 #include <QMessageBox>
+#include <QRegularExpression>
 
 #include <QFile>
 #include <QTextStream>
@@ -96,7 +97,7 @@ bool ExifTreeModel::registerUserNs(QString userNs, QString userNsPrefix)
 	{
 		Exiv2::XmpProperties::registerNs(userNs.toStdString(), userNsPrefix.toStdString());
 	}
-	catch(Exiv2::AnyError& exc)
+	catch(Exiv2::Error& exc)
 	{
 		customUserNs = customUserNsPrefix = "";
 
@@ -120,7 +121,7 @@ bool ExifTreeModel::unregisterUserNs()
 
 		customUserNs = customUserNsPrefix = "";
 	}
-	catch(Exiv2::AnyError& exc)
+	catch(Exiv2::Error& exc)
 	{
 		return false;
 	}
@@ -149,7 +150,7 @@ bool ExifTreeModel::openFile(QString filename)
 		// read metadata
 		exifHandle->readMetadata();
 	}
-	catch(Exiv2::AnyError& err)
+	catch(Exiv2::Error& err)
 	{
 		qDebug("AnalogExif: ExifTreeModel::openFile(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
 		return false;
@@ -188,7 +189,7 @@ int ExifTreeModel::rowCount(const QModelIndex &parent) const
 Qt::ItemFlags ExifTreeModel::flags(const QModelIndex &index) const
 {
 	if(!index.isValid())
-		return 0;
+		return Qt::ItemFlag::NoItemFlags;
 
 	// caption or tag text - selectable, enabled, non-editable
 	if(index.column() == 0)
@@ -253,10 +254,10 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 
 				if((strList != QStringList()) && (strList.count() > 1))
 				{
-					QString text = QString(itemFormat).arg(strList.at(0)).replace(QRegExp("(\r|\n)"), " ").replace(QRegExp("(\\s)+"), " ");
+					QString text = QString(itemFormat).arg(strList.at(0)).replace(QRegularExpression("(\r|\n)"), " ").replace(QRegularExpression("(\\s)+"), " ");
 					
 					if((strList.at(1) != "") && (strList.at(1) != strList.at(0)))
-						text += " (" + QString(itemFormat).arg(strList.at(1)).replace(QRegExp("(\r|\n)"), " ").replace(QRegExp("(\\s)+"), " ") + ")";
+						text += " (" + QString(itemFormat).arg(strList.at(1)).replace(QRegularExpression("(\r|\n)"), " ").replace(QRegularExpression("(\\s)+"), " ") + ")";
 
 					return text;
 				}
@@ -267,7 +268,7 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 			}
 			else
 			{
-				return QString(itemFormat).arg(itemValue.toString()).replace(QRegExp("(\r|\n)"), " ").replace(QRegExp("(\\s)+"), " ");
+				return QString(itemFormat).arg(itemValue.toString()).replace(QRegularExpression("(\r|\n)"), " ").replace(QRegularExpression("(\\s)+"), " ");
 			}
 		}
 		else if(role == Qt::EditRole)
@@ -343,7 +344,8 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 		{
 			if(role == Qt::DisplayRole)
 			{
-				return itemValue.toDateTime().toString(Qt::DefaultLocaleShortDate);
+				QLocale locale;
+				return itemValue.toDateTime().toString(locale.dateFormat(QLocale::ShortFormat));
 			}
 		}
 		break;
@@ -780,7 +782,7 @@ QVariant ExifTreeModel::getTagValueFromExif(ExifItem::TagType tagType, const Exi
 	case Exiv2::signedShort:
 	case Exiv2::signedLong:
 	case Exiv2::undefined:
-		return QVariant::fromValue(tagValue.toLong(pos));
+		return QVariant::fromValue(tagValue.toInt64(pos));
 		break;
 	case Exiv2::unsignedRational:
 	case Exiv2::signedRational:
@@ -808,7 +810,7 @@ QVariant ExifTreeModel::getTagValueFromExif(ExifItem::TagType tagType, const Exi
 QVariant ExifTreeModel::readTagValue(QString tagNames, int& srcTagType, ExifItem::TagType type, ExifItem::TagFlags tagFlags, Exiv2::ExifData& exifData, Exiv2::IptcData& iptcData, Exiv2::XmpData& xmpData)
 {
 	// get list of tags
-	QStringList tags = tagNames.remove(QChar(' ')).split(",", QString::SkipEmptyParts);
+	QStringList tags = tagNames.remove(QChar(' ')).split(",", Qt::SkipEmptyParts);
 
 	foreach(QString tagName, tags)
 	{
@@ -974,7 +976,7 @@ QVariant ExifTreeModel::readTagValue(QString tagNames, int& srcTagType, ExifItem
 				{
 					std::string str = tagValue.toString();
 					// do not convert real numbers to Exif fraction format
-					return ExifItem::valueFromString(QString::fromUtf8(str.data(), (int)str.length()).remove(QRegExp("^lang=\".*\" ")), type, false, ExifItem::None);
+					return ExifItem::valueFromString(QString::fromUtf8(str.data(), (int)str.length()).remove(QRegularExpression("^lang=\".*\" ")), type, false, ExifItem::None);
 				}
 				break;
 			case Exiv2::xmpAlt:
@@ -1073,7 +1075,7 @@ void ExifTreeModel::processTag(ExifItem* tag, Exiv2::ExifData& exifData, Exiv2::
 	tag->setValue(tagValue);
 }
 
-bool ExifTreeModel::readMetaValues(Exiv2::Image::AutoPtr& exivHandle)
+bool ExifTreeModel::readMetaValues(Exiv2::Image::UniquePtr& exivHandle)
 {
 	// check for empty image
 	if(!exivHandle.get())
@@ -1101,7 +1103,7 @@ bool ExifTreeModel::readMetaValues(Exiv2::Image::AutoPtr& exivHandle)
 			{
 				processTag(tag, curExifData, curIptcData, curXmpData);
 			}
-			catch(Exiv2::AnyError& err)
+			catch(Exiv2::Error& err)
 			{
 				qDebug("AnalogExif: ExifTreeModel::readMetaValues() Exiv2 exception (%d) = %s", err.code(), err.what());
 				return false;
@@ -1144,37 +1146,37 @@ void ExifTreeModel::repopulate()
 
 bool ExifTreeModel::parseGPSString(QString gpsStr, QString& latRef, int& latDeg, int& latMin, double& latSec, QString& lonRef, int& lonDeg, int& lonMin, double& lonSec)
 {
-	QRegExp regEx("(\\+|\\-)?(\\d{1,2})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\" (\\+|\\-)?(\\d{1,3})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\"");
+	QRegularExpression regEx("(\\+|\\-)?(\\d{1,2})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\" (\\+|\\-)?(\\d{1,3})\u00B0\\s*(\\d{1,2})'\\s*(\\d{1,2}(?:\\.\\d{1,3})?)\"");
 
 	QStringList caps;
 
-	if(regEx.indexIn(gpsStr) != -1)
+	if(regEx.match(gpsStr).hasMatch() == true)
 	{
-		caps = regEx.capturedTexts();
+		caps = regEx.match(gpsStr).capturedTexts();
 
 		if(caps.size() == 9)
 		{
 			// parse latitude reference
-			if(regEx.cap(1) == "+")
+			if(regEx.match(gpsStr).captured(1) == "+")
 				latRef = "N";
 			else
 				latRef = "S";
 
 			// parse latitude
-			latDeg = regEx.cap(2).toInt();
-			latMin = regEx.cap(3).toInt();
-			latSec = regEx.cap(4).toDouble();
+			latDeg = regEx.match(gpsStr).captured(2).toInt();
+			latMin = regEx.match(gpsStr).captured(3).toInt();
+			latSec = regEx.match(gpsStr).captured(4).toDouble();
 
 			// parse longitude reference
-			if(regEx.cap(5) == "+")
+			if(regEx.match(gpsStr).captured(5) == "+")
 				lonRef = "E";
 			else
 				lonRef = "W";
 
 			// parse latitude
-			lonDeg = regEx.cap(6).toInt();
-			lonMin = regEx.cap(7).toInt();
-			lonSec = regEx.cap(8).toDouble();
+			lonDeg = regEx.match(gpsStr).captured(6).toInt();
+			lonMin = regEx.match(gpsStr).captured(7).toInt();
+			lonSec = regEx.match(gpsStr).captured(8).toDouble();
 
 			return true;
 		}
@@ -1217,7 +1219,7 @@ bool ExifTreeModel::storeGPSInExif(QString gpsStr, Exiv2::ExifData& exifData)
 	{
 		exifData["Exif.GPSInfo.GPSLatitudeRef"] = latRef.toStdString();
 
-		Exiv2::RationalValue::AutoPtr rv(new Exiv2::RationalValue);
+		Exiv2::RationalValue::UniquePtr rv(new Exiv2::RationalValue);
 		rv->value_.push_back(std::make_pair(latDeg,1));
 		rv->value_.push_back(std::make_pair(latMin,1));
 
@@ -1227,7 +1229,7 @@ bool ExifTreeModel::storeGPSInExif(QString gpsStr, Exiv2::ExifData& exifData)
 
 		exifData["Exif.GPSInfo.GPSLongitudeRef"] = lonRef.toStdString();
 
-		Exiv2::RationalValue::AutoPtr rv1(new Exiv2::RationalValue);
+		Exiv2::RationalValue::UniquePtr rv1(new Exiv2::RationalValue);
 		rv1->value_.push_back(std::make_pair(lonDeg,1));
 		rv1->value_.push_back(std::make_pair(lonMin,1));
 
@@ -1235,7 +1237,7 @@ bool ExifTreeModel::storeGPSInExif(QString gpsStr, Exiv2::ExifData& exifData)
 
 		exifData["Exif.GPSInfo.GPSLongitude"] = *rv1;
 	}
-	catch(Exiv2::AnyError& err)
+	catch(Exiv2::Error& err)
 	{
 		qDebug("AnalogExif: ExifTreeModel::storeGPSInExif() Exiv2 exception (%d) = %s", err.code(), err.what());
 		return false;
@@ -1269,7 +1271,7 @@ bool ExifTreeModel::storeGPSInXmp(QString gpsStr, Exiv2::XmpData& xmpData)
 		QString lonStr = QString("%1,%2%3").arg(lonDeg, 3, 10, QChar('0')).arg(lonMin, 2, 'f', 4, QChar('0')).arg(lonRef);
 		xmpData["Xmp.exif.GPSLongitude"] = lonStr.toStdString();
 	}
-	catch(Exiv2::AnyError& err)
+	catch(Exiv2::Error& err)
 	{
 		qDebug("AnalogExif: ExifTreeModel::storeGPSInXmp() Exiv2 exception (%d) = %s", err.code(), err.what());
 		return false;
@@ -1302,7 +1304,7 @@ void ExifTreeModel::tagValueToMetadata(QVariant value, ExifItem::TagType tagType
 
 void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, ExifItem::TagType type, ExifItem::TagFlags tagFlags, Exiv2::ExifData& exifData, Exiv2::IptcData& iptcData, Exiv2::XmpData& xmpData)
 {
-	QStringList tags = tagNames.remove(QChar(' ')).split(",", QString::SkipEmptyParts);
+	QStringList tags = tagNames.remove(QChar(' ')).split(",", Qt::SkipEmptyParts);
 
 	foreach(QString tagName, tags)
 	{
@@ -1316,7 +1318,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 			// erase tag if it is empty
 			if(tagValue != QVariant())
 			{
-				Exiv2::Value::AutoPtr v;
+				Exiv2::Value::UniquePtr v;
 
 				// set tag data according to its Exiv2 type
 				Exiv2::TypeId typId = Exiv2::Exifdatum(exifKey).typeId();
@@ -1390,7 +1392,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 					// store each value as separate tag
 					foreach(QVariant value, valueList)
 					{
-						Exiv2::Value::AutoPtr v = Exiv2::Value::create(typId);
+						Exiv2::Value::UniquePtr v = Exiv2::Value::create(typId);
 						tagValueToMetadata(value, type, *v);
 						iptcData.add(iptcKey, v.get());
 						v.reset();
@@ -1398,7 +1400,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 				}
 				else
 				{
-					Exiv2::Value::AutoPtr v = Exiv2::Value::create(typId);
+					Exiv2::Value::UniquePtr v = Exiv2::Value::create(typId);
 					tagValueToMetadata(tagValue, type, *v);
 					iptcData[tagName.toStdString()] = *v;
 					v.reset();
@@ -1423,7 +1425,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 					typId = Exiv2::xmpSeq;
 				}
 
-				Exiv2::Value::AutoPtr v;
+				Exiv2::Value::UniquePtr v;
 				
 				switch(typId)
 				{
@@ -1537,7 +1539,7 @@ bool ExifTreeModel::prepareMetadata(Exiv2::ExifData& exifData, Exiv2::IptcData& 
 					if(!storeTag(tag, exifData, iptcData, xmpData))
 						return false;
 				}
-				catch(Exiv2::AnyError& err)
+				catch(Exiv2::Error& err)
 				{
 					qDebug("AnalogExif: ExifTreeModel::prepareMetadata() Exiv2 exception (%d) = %s", err.code(), err.what());
 					return false;
@@ -1555,10 +1557,10 @@ bool ExifTreeModel::prepareMetadata(Exiv2::ExifData& exifData, Exiv2::IptcData& 
 }
 
 // convert QString to UTF-16 Exif byte string
-Exiv2::Value::AutoPtr ExifTreeModel::QStringToExifUtf(QString qstr, bool addUnicodeMarker, bool isUtf8, Exiv2::TypeId typeId)
+Exiv2::Value::UniquePtr ExifTreeModel::QStringToExifUtf(QString qstr, bool addUnicodeMarker, bool isUtf8, Exiv2::TypeId typeId)
 {
 	// create as Exif byte value
-	Exiv2::Value::AutoPtr v;
+	Exiv2::Value::UniquePtr v;
 	
 	v = Exiv2::Value::create(typeId);
 
@@ -1598,7 +1600,7 @@ void ExifTreeModel::QStringToExifUtf(Exiv2::Value& v, QString qstr, bool addUnic
 // convert Exif UTF-16 byte string to QString
 QString ExifTreeModel::ExifUtfToQString(const Exiv2::Value& exifData, bool checkForMarker, bool isUtf8)
 {
-	int strSize = exifData.size();
+	int strSize = (int)exifData.size();
 	if(strSize == 0)
 		return "";
 
@@ -1702,10 +1704,10 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 
 #ifdef Q_WS_WIN
 		// unicode paths are supported only in Windows verison
-	    Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+	    Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
 #else
 		// use UTF-8
-		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
 #endif
 
 	    if((image.get() == 0) || (!image->good()))
@@ -1764,7 +1766,7 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 
 		delete image.release();
 	}
-	catch(Exiv2::AnyError& err)
+	catch(Exiv2::Error& err)
 	{
 		qDebug("AnalogExif: ExifTreeModel::saveFile(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
 		return false;
@@ -1830,7 +1832,7 @@ void ExifTreeModel::fillNotSupportedTags()
 bool ExifTreeModel::tagSupported(const QString tagName)
 {
 	QSettings settings;
-	QStringList strList = tagName.split(QChar('.'), QString::SkipEmptyParts);
+	QStringList strList = tagName.split(QChar('.'), Qt::SkipEmptyParts);
 
 	if(strList.count() != 3)
 		return false;
@@ -1909,7 +1911,7 @@ void ExifTreeModel::eraseTag(ExifItem* tag, Exiv2::ExifData& exifData, Exiv2::Ip
 
 void ExifTreeModel::eraseTag(QString tagNames, Exiv2::ExifData& exifData, Exiv2::IptcData& iptcData, Exiv2::XmpData& xmpData)
 {
-	QStringList tags = tagNames.remove(QChar(' ')).split(",", QString::SkipEmptyParts);
+	QStringList tags = tagNames.remove(QChar(' ')).split(",", Qt::SkipEmptyParts);
 
 	foreach(QString tagName, tags)
 	{
@@ -2002,10 +2004,10 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 	{
 #ifdef Q_WS_WIN
 		// unicode paths are supported only in Windows verison
-	    Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+	    Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
 #else
 		// use UTF-8
-		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
 #endif
 
 	    if((image.get() == 0) || (!image->good()))
@@ -2052,10 +2054,10 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 	{
 #ifdef Q_WS_WIN
 		// unicode paths are supported only in Windows verison
-	    Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+	    Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
 #else
 		// use UTF-8
-		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
 #endif
 
 	    if((image.get() == 0) || (!image->good()))
