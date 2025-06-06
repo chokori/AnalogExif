@@ -45,9 +45,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="ｔｅｓｔ">
-      <UniqueIdentifier>{92c8db88-1a56-4c7e-8d8f-64f89a485ed3}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aboutdialog.cpp">
