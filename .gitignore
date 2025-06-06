@@ -3,9 +3,6 @@
 /.qmake.stash
 /.vs/
 /AnalogExif.nsh
-/AnalogExif.vcxproj
-/AnalogExif.vcxproj.filters
-/AnalogExif.vcxproj.user
 /Backup/AnalogExif.sln
 /Debug/
 /UpgradeLog.htm
@@ -25,6 +22,4 @@
 /version.xml
 /release/
 /AnalogExif.pro.user
-/exiv2.lib
-/libexpat.lib
-/AnalogExif.qtvscr
+
