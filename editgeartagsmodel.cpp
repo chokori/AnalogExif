@@ -45,14 +45,10 @@ QVariant EditGearTagsModel::data(const QModelIndex &index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	//if(!query().seek(index.row()))
-	//	return QVariant();
-	
-	if(record(index.row()).isEmpty())
+	QSqlQuery rec= query();
+	if (!rec.seek(index.row()))
 		return QVariant();
 
-	QSqlRecord rec = record(index.row());
-	
 	// return tag text for column 0
 	if((index.column() == 0)  && (role == Qt::DisplayRole))
 		return rec.value(0).toString();
@@ -93,13 +89,9 @@ bool EditGearTagsModel::setData(const QModelIndex &index, const QVariant &dataVa
 	if (role != Qt::EditRole)
 		return false;
 
-	//if(!query().seek(index.row()))
-	//	return false;
-
-	if(record(index.row()).isEmpty())
+	QSqlQuery rec= query();
+	if (!rec.seek(index.row()))
 		return false;
-
-	QSqlRecord rec = record(index.row());
 	
 	ExifItem::TagType tagType = (ExifItem::TagType)rec.value(2).toInt();
 	ExifItem::TagFlags tagFlags = (ExifItem::TagFlags)rec.value(5).toInt();
