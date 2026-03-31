@@ -37,8 +37,9 @@
 #include <QSysInfo>
 #include <QTimer>
 #include <QImageReader>
+#include <QElapsedTimer>
 
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 #include <windows.h>
 #endif
 
@@ -129,8 +130,9 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 	connect(verChecker, SIGNAL(newVersionAvailable(QString, QString, QDateTime, QString)), this, SLOT(newVersionAvailable(QString, QString, QDateTime, QString)));
 	connect(verChecker, SIGNAL(newVersionCheckError(QNetworkReply::NetworkError)), this, SLOT(newVersionCheckError(QNetworkReply::NetworkError)));
 
-#ifdef Q_WS_WIN
-	if(QSysInfo::windowsVersion() >= QSysInfo::WV_VISTA)
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
+	//if(QSysInfo::windowsVersion() >= QSysInfo::WV_VISTA)
+	if (1)//TODO
 	{
 		// For Vista/W7 style - disable alternating row colors on equipment views for better visibility
 		ui.gearView->setAlternatingRowColors(false);
@@ -310,8 +312,8 @@ bool AnalogExif::initialize()
 
 void AnalogExif::scrollToSelectedDir()
 {
-	if(curDirIndex.isValid())
-		ui.dirView->scrollTo(curDirIndex, QAbstractItemView::PositionAtCenter);
+	//if(curDirIndex.isValid())
+	//	ui.dirView->scrollTo(curDirIndex, QAbstractItemView::PositionAtCenter);
 }
 
 void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const QItemSelection&)
@@ -1449,7 +1451,7 @@ QString AnalogExif::createLibrary(QWidget* parent, QString dir)
 		}
 
 		// fix file access
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 		// use file attributes under Win32
 		if(!SetFileAttributes((LPCTSTR)newDb.toStdWString().c_str(), FILE_ATTRIBUTE_NORMAL))
 		{

@@ -20,11 +20,11 @@
 #include "analogexif.h"
 #include <QApplication>
 
-#ifdef Q_WS_WIN32
+#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
 #include <QtPlugin>
 
-Q_IMPORT_PLUGIN(qjpeg)
-Q_IMPORT_PLUGIN(qsqlite)
+//QTPLUGIN(qjpeg)
+//Q_IMPORT_PLUGIN(qsqlite)
 #endif
 
 int main(int argc, char *argv[])
@@ -32,6 +32,15 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("C-41 Bytes");
 	QCoreApplication::setOrganizationDomain("c41bytes.com");
 	QCoreApplication::setApplicationName("AnalogExif");
+
+    // Pass the locking mechanism to the XMP parser on initialization.
+    // Note however that this call itself is still not thread-safe.
+	setlocale(LC_CTYPE, ".utf8");
+	Exiv2::XmpParser::initialize();
+	::atexit(Exiv2::XmpParser::terminate);
+
+    // Program continues here, subsequent registrations of XMP
+    // namespaces are serialized using xmpLock.
 
 	QApplication a(argc, argv);
 	AnalogExif w;

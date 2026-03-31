@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Copyright (C) 2010 C-41 Bytes <contact@c41bytes.com>
 
 	This file is part of AnalogExif.
@@ -138,13 +138,23 @@ bool ExifTreeModel::openFile(QString filename)
 	try
 	{
 		// open file using Exiv2 library
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 		// unicode paths supported only in windows version
-		exifHandle = Exiv2::ImageFactory::open(filename.toStdWString());
+		exifHandle = Exiv2::ImageFactory::open(filename.toUtf8().constData());
+		//exifHandle = Exiv2::ImageFactory::open(filename.toStdWString());
+		//exifHandle = Exiv2::ImageFactory::open(filename.toStdString());
+
+		//exifHandle = Exiv2::ImageFactory::open(std::string(filename.toUtf8().begin(), filename.toUtf8().end()));
+		//exifHandle = Exiv2::ImageFactory::open(std::string(filename.toUtf8().begin(), filename.toUtf8().end()));
+		//exifHandle = Exiv2::ImageFactory::open(std::string(filename.toUtf8().data()));
+
 #else
 		// convert to UTF-8
-		exifHandle = Exiv2::ImageFactory::open(filename.toUtf8().data());
+		//exifHandle = Exiv2::ImageFactory::open(filename.toUtf8().data());
+		exifHandle = Exiv2::ImageFactory::open(filename.toStdString());
 #endif
+
+
 		if(exifHandle.get() == 0)
 			return false;
 		// read metadata
@@ -1702,9 +1712,10 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 	try
 	{
 
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 		// unicode paths are supported only in Windows verison
-	    Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+	    //Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
 #else
 		// use UTF-8
 		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
@@ -2002,9 +2013,10 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 
 	try
 	{
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 		// unicode paths are supported only in Windows verison
-	    Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+	    //Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
 #else
 		// use UTF-8
 		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
@@ -2052,9 +2064,10 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 
 	try
 	{
-#ifdef Q_WS_WIN
+#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 		// unicode paths are supported only in Windows verison
-	    Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+	    //Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
 #else
 		// use UTF-8
 		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());

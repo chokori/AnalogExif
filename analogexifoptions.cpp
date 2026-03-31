@@ -27,7 +27,7 @@
 
 #include "exiftreemodel.h"
 
-#ifdef Q_WS_WIN32
+#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
 
 // use Windows CryptoAPI
 #pragma comment(lib, "crypt32.lib")
@@ -342,7 +342,7 @@ void AnalogExifOptions::loadOptions()
 
 	QString userPassword;
 
-#ifdef Q_WS_WIN32
+#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
 	QByteArray userPwd = settings.value("ProxyPassword", QByteArray()).toByteArray();
 
 	// decode password using CryptoAPI under Windows
@@ -484,9 +484,9 @@ bool AnalogExifOptions::saveOptions()
 		settings.setValue("ProxyPort", ui.proxyPort->value());
 		settings.setValue("ProxyUsername", ui.proxyUsername->text());
 
-#ifdef Q_WS_WIN32
+#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
 		QByteArray userPassword;
-		userPassword.append(ui.proxyPassword->text());
+		userPassword.append(ui.proxyPassword->text().toUtf8());
 
 		// encode password using CryptoAPI under Windows
 		if(userPassword != QByteArray())
@@ -746,7 +746,7 @@ void AnalogExifOptions::setupProxy()
 		QString userName = settings.value("ProxyUsername", QString()).toString();
 		QString userPassword;
 
-#ifdef Q_WS_WIN32
+#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
 		QByteArray userPwd = settings.value("ProxyPassword", QByteArray()).toByteArray();
 
 		// decode password using CryptoAPI under Windows
