@@ -7,14 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>909</width>
-    <height>633</height>
+    <height>719</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
   <property name="windowIcon">
-   <iconset resource="analogexif.qrc">
+   <iconset resource="../res/analogexif.qrc">
     <normaloff>:/images/icons/film_edit.png</normaloff>:/images/icons/film_edit.png</iconset>
   </property>
   <property name="statusTip">
@@ -42,11 +47,16 @@
         <verstretch>100</verstretch>
        </sizepolicy>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::Shape::NoFrame</enum>
       </property>
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
       <property name="childrenCollapsible">
        <bool>true</bool>
@@ -63,6 +73,11 @@
          <width>250</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="title">
         <string>Files</string>
@@ -92,11 +107,12 @@
           </property>
           <property name="font">
            <font>
+            <pointsize>9</pointsize>
             <kerning>true</kerning>
            </font>
           </property>
           <property name="contextMenuPolicy">
-           <enum>Qt::ActionsContextMenu</enum>
+           <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
           </property>
           <property name="statusTip">
            <string>File system view</string>
@@ -109,13 +125,13 @@ QTreeView::item:selected:!active{
 }</string>
           </property>
           <property name="editTriggers">
-           <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+           <set>QAbstractItemView::EditTrigger::EditKeyPressed|QAbstractItemView::EditTrigger::SelectedClicked</set>
           </property>
           <property name="dragDropMode">
-           <enum>QAbstractItemView::DragDrop</enum>
+           <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
+           <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
           </property>
           <property name="indentation">
            <number>10</number>
@@ -132,15 +148,52 @@ QTreeView::item:selected:!active{
           <attribute name="headerVisible">
            <bool>false</bool>
           </attribute>
-          <attribute name="headerVisible">
-           <bool>false</bool>
-          </attribute>
          </widget>
         </item>
         <item>
          <widget class="QListView" name="fileView">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
           <property name="contextMenuPolicy">
-           <enum>Qt::ActionsContextMenu</enum>
+           <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QListView {
+    outline: none;
+    font-size: 8pt;
+    background-color: white;
+}
+
+QListView::item {
+    padding: 0px 4px;
+    margin: 0px;
+    border: none;
+}
+
+QListView::item:hover {
+    background-color: #f1f4f9;
+    color: #333333;
+}
+
+QListView::item:selected:active {
+    background-color: #d1e6f7;
+    color: #005a9e;
+    border: 1px solid #a8c9e5;
+}
+
+QListView::item:selected:!active {
+    background-color: #e0e0e0;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+}
+
+QListView::item:focus {
+    border: none;
+    outline: none;
+}</string>
           </property>
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
@@ -149,16 +202,19 @@ QTreeView::item:selected:!active{
            <bool>true</bool>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
+           <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
           </property>
           <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
           </property>
           <property name="isWrapping" stdset="0">
            <bool>false</bool>
           </property>
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <property name="viewMode">
-           <enum>QListView::ListMode</enum>
+           <enum>QListView::ViewMode::ListMode</enum>
           </property>
           <property name="uniformItemSizes">
            <bool>true</bool>
@@ -172,6 +228,11 @@ QTreeView::item:selected:!active{
             <horstretch>100</horstretch>
             <verstretch>25</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
           </property>
           <property name="title">
            <string>File preview</string>
@@ -197,6 +258,11 @@ QTreeView::item:selected:!active{
                <height>0</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -204,7 +270,7 @@ QTreeView::item:selected:!active{
               <bool>false</bool>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -219,6 +285,11 @@ QTreeView::item:selected:!active{
          <horstretch>75</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="title">
         <string>Details</string>
@@ -237,6 +308,11 @@ QTreeView::item:selected:!active{
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Current image</string>
             </property>
@@ -252,14 +328,56 @@ QTreeView::item:selected:!active{
             </property>
             <property name="font">
              <font>
-              <kerning>true</kerning>
+              <pointsize>8</pointsize>
              </font>
             </property>
             <property name="contextMenuPolicy">
-             <enum>Qt::ActionsContextMenu</enum>
+             <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
             </property>
             <property name="statusTip">
              <string>Current image properties</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">
+QTreeView {
+    outline: none;
+    border: 1px solid #e0e0e0;
+    font-size: 8pt;              
+    show-decoration-selected: 1;
+}
+
+QTreeView::item {
+    padding: 2px 4px;              margin: 0px; 
+    border: none;
+    color: #333333;
+}
+QTreeView::branch {
+    background-color: transparent;
+}
+
+QTreeView::branch:selected, 
+QTreeView::item:selected:active {
+    background-color: #d1e6f7;  
+    color: #005a9e;
+}
+
+QTreeView::item:hover, 
+QTreeView::branch:hover {
+    background-color: #f1f4f9;
+}
+
+QTreeView::item:selected:!active, 
+QTreeView::branch:selected:!active {
+    background-color: #eceff1;
+    color: #666666;
+}
+
+QTreeView::branch:has-siblings:!adjoins-item,
+QTreeView::branch:has-siblings:adjoins-item,
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    image: none;
+}
+</string>
             </property>
             <property name="showDropIndicator" stdset="0">
              <bool>false</bool>
@@ -268,7 +386,7 @@ QTreeView::item:selected:!active{
              <bool>true</bool>
             </property>
             <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
+             <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
             </property>
             <property name="rootIsDecorated">
              <bool>true</bool>
@@ -285,20 +403,19 @@ QTreeView::item:selected:!active{
             <attribute name="headerCascadingSectionResizes">
              <bool>true</bool>
             </attribute>
-            <attribute name="headerCascadingSectionResizes">
-             <bool>true</bool>
-            </attribute>
-            <attribute name="headerVisible">
-             <bool>false</bool>
-            </attribute>
            </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <spacer name="horizontalSpacer">
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -313,6 +430,11 @@ QTreeView::item:selected:!active{
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="statusTip">
                <string>Apply changes</string>
               </property>
@@ -325,6 +447,11 @@ QTreeView::item:selected:!active{
              <widget class="QPushButton" name="revertBtn">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
               </property>
               <property name="statusTip">
                <string>Revert changes</string>
@@ -354,6 +481,11 @@ QTreeView::item:selected:!active{
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Equipment</string>
             </property>
@@ -369,11 +501,12 @@ QTreeView::item:selected:!active{
             </property>
             <property name="font">
              <font>
+              <pointsize>9</pointsize>
               <kerning>true</kerning>
              </font>
             </property>
             <property name="contextMenuPolicy">
-             <enum>Qt::ActionsContextMenu</enum>
+             <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
             </property>
             <property name="toolTip">
              <string/>
@@ -389,7 +522,7 @@ QTreeView::item:selected:!active{
 }</string>
             </property>
             <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
             </property>
             <property name="showDropIndicator" stdset="0">
              <bool>false</bool>
@@ -398,7 +531,7 @@ QTreeView::item:selected:!active{
              <bool>true</bool>
             </property>
             <property name="textElideMode">
-             <enum>Qt::ElideRight</enum>
+             <enum>Qt::TextElideMode::ElideRight</enum>
             </property>
             <property name="rootIsDecorated">
              <bool>true</bool>
@@ -419,6 +552,11 @@ QTreeView::item:selected:!active{
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Film</string>
             </property>
@@ -428,11 +566,12 @@ QTreeView::item:selected:!active{
            <widget class="GearListView" name="filmView">
             <property name="font">
              <font>
+              <pointsize>9</pointsize>
               <kerning>true</kerning>
              </font>
             </property>
             <property name="contextMenuPolicy">
-             <enum>Qt::ActionsContextMenu</enum>
+             <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
             </property>
             <property name="toolTip">
              <string/>
@@ -445,16 +584,21 @@ QTreeView::item:selected:!active{
 QListView::item:selected:!active{
 	selection-color:						palette(highlighted-text);
 	selection-background-color:	palette(highlight);
-}</string>
+}
+
+</string>
             </property>
             <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
             </property>
             <property name="showDropIndicator" stdset="0">
              <bool>false</bool>
             </property>
             <property name="alternatingRowColors">
              <bool>true</bool>
+            </property>
+            <property name="spacing">
+             <number>0</number>
             </property>
             <property name="uniformItemSizes">
              <bool>true</bool>
@@ -463,6 +607,11 @@ QListView::item:selected:!active{
           </item>
           <item>
            <widget class="QLabel" name="label_5">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Developer</string>
             </property>
@@ -472,11 +621,12 @@ QListView::item:selected:!active{
            <widget class="GearListView" name="developerView">
             <property name="font">
              <font>
+              <pointsize>9</pointsize>
               <kerning>true</kerning>
              </font>
             </property>
             <property name="contextMenuPolicy">
-             <enum>Qt::ActionsContextMenu</enum>
+             <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
             </property>
             <property name="statusTip">
              <string>List of the available photographic developers. Double-click to apply to the current photo.</string>
@@ -491,10 +641,18 @@ QListView::item:selected:!active{
             <property name="alternatingRowColors">
              <bool>true</bool>
             </property>
+            <property name="spacing">
+             <number>0</number>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Author</string>
             </property>
@@ -504,11 +662,11 @@ QListView::item:selected:!active{
            <widget class="GearListView" name="authorView">
             <property name="font">
              <font>
-              <kerning>true</kerning>
+              <pointsize>9</pointsize>
              </font>
             </property>
             <property name="contextMenuPolicy">
-             <enum>Qt::ActionsContextMenu</enum>
+             <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
             </property>
             <property name="statusTip">
              <string>List of the defined authors. Double-click to apply to the current photo.</string>
@@ -523,14 +681,25 @@ QListView::item:selected:!active{
             <property name="alternatingRowColors">
              <bool>true</bool>
             </property>
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="batchSize">
+             <number>100</number>
+            </property>
            </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <spacer name="horizontalSpacer_2">
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -544,6 +713,11 @@ QListView::item:selected:!active{
              <widget class="QPushButton" name="applyGearBtn">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
               </property>
               <property name="toolTip">
                <string/>
@@ -653,7 +827,7 @@ QListView::item:selected:!active{
     <string>About Analog Exif...</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::AboutRole</enum>
+    <enum>QAction::MenuRole::AboutRole</enum>
    </property>
   </action>
   <action name="actionExit">
@@ -664,12 +838,12 @@ QListView::item:selected:!active{
     <string>Exit</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::QuitRole</enum>
+    <enum>QAction::MenuRole::QuitRole</enum>
    </property>
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/cog.png</normaloff>:/images/icons/cog.png</iconset>
    </property>
    <property name="text">
@@ -681,7 +855,7 @@ QListView::item:selected:!active{
   </action>
   <action name="actionEdit_gear">
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/camera_edit.png</normaloff>:/images/icons/camera_edit.png</iconset>
    </property>
    <property name="text">
@@ -696,7 +870,7 @@ QListView::item:selected:!active{
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/folder_camera.png</normaloff>:/images/icons/folder_camera.png</iconset>
    </property>
    <property name="text">
@@ -709,7 +883,7 @@ QListView::item:selected:!active{
     <string>Ctrl+O</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionApply_gear">
@@ -717,7 +891,7 @@ QListView::item:selected:!active{
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/camera_go.png</normaloff>:/images/icons/camera_go.png</iconset>
    </property>
    <property name="text">
@@ -735,7 +909,7 @@ QListView::item:selected:!active{
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/arrow_rotate_anticlockwise.png</normaloff>:/images/icons/arrow_rotate_anticlockwise.png</iconset>
    </property>
    <property name="text">
@@ -753,7 +927,7 @@ QListView::item:selected:!active{
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/disk.png</normaloff>:/images/icons/disk.png</iconset>
    </property>
    <property name="text">
@@ -788,7 +962,7 @@ QListView::item:selected:!active{
     <string>Del</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::WidgetShortcut</enum>
+    <enum>Qt::ShortcutContext::WidgetShortcut</enum>
    </property>
   </action>
   <action name="actionOpen_library">
@@ -806,7 +980,7 @@ QListView::item:selected:!active{
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/film_edit.png</normaloff>:/images/icons/film_edit.png</iconset>
    </property>
    <property name="text">
@@ -824,7 +998,7 @@ QListView::item:selected:!active{
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="analogexif.qrc">
+    <iconset resource="../res/analogexif.qrc">
      <normaloff>:/images/icons/film_go.png</normaloff>:/images/icons/film_go.png</iconset>
    </property>
    <property name="text">
@@ -862,7 +1036,7 @@ QListView::item:selected:!active{
     <string>Del</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::WidgetShortcut</enum>
+    <enum>Qt::ShortcutContext::WidgetShortcut</enum>
    </property>
   </action>
   <action name="actionRename">
@@ -903,7 +1077,7 @@ QListView::item:selected:!active{
   <tabstop>authorView</tabstop>
  </tabstops>
  <resources>
-  <include location="analogexif.qrc"/>
+  <include location="../res/analogexif.qrc"/>
  </resources>
  <connections>
   <connection>

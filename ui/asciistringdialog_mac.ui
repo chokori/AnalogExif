@@ -3,7 +3,7 @@
  <class>AsciiStringDialogClass</class>
  <widget class="QDialog" name="AsciiStringDialogClass">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -17,7 +17,7 @@
    <string>Edit non-unicode string</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="analogexif.qrc">
+   <iconset resource="../res/analogexif.qrc">
     <normaloff>:/images/icons/film_edit.png</normaloff>:/images/icons/film_edit.png</iconset>
   </property>
   <property name="modal">
@@ -30,7 +30,7 @@
       <string>You have entered non-Ascii characters into this field. Some metadata tags associated with this field do not support Unicode and can not store these characters properly. The value you have entered will be converted to Ascii according to your computer's locale; however, you can review the result and provide Ascii-only alternative to the entered value.</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignJustify|Qt::AlignTop</set>
+      <set>Qt::AlignmentFlag::AlignJustify|Qt::AlignmentFlag::AlignTop</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -42,7 +42,7 @@
      <item>
       <layout class="QFormLayout" name="formLayout">
        <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+        <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_2">
@@ -82,7 +82,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="analogexif.qrc">
+        <iconset resource="../res/analogexif.qrc">
          <normaloff>:/images/icons/arrow_undo.png</normaloff>:/images/icons/arrow_undo.png</iconset>
        </property>
        <property name="autoRaise">
@@ -95,7 +95,7 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel</set>
+      <set>QDialogButtonBox::StandardButton::Cancel</set>
      </property>
     </widget>
    </item>
@@ -103,7 +103,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="analogexif.qrc"/>
+  <include location="../res/analogexif.qrc"/>
  </resources>
  <connections/>
 </ui>
