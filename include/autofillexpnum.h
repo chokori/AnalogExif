@@ -23,6 +23,7 @@
 #include <QDialog>
 #include <QStringList>
 #include <QStandardItemModel>
+#include <QFileInfo>
 #include "ui_autofillexpnum.h"
 
 class AutoFillExpNum : public QDialog

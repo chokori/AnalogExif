@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Copyright (C) 2010 C-41 Bytes <contact@c41bytes.com>
 
 	This file is part of AnalogExif.
@@ -169,6 +169,12 @@ AnalogExif::~AnalogExif()
 // perform all initialization
 bool AnalogExif::initialize()
 {
+	ui.fileView->setSpacing(0);
+	ui.filmView->setSpacing(0);
+	ui.developerView->setSpacing(0);
+	ui.authorView->setSpacing(0);
+	ui.fileView->setIconSize(QSize(12, 12)); 
+
 	// open database
 	QString dbName = settings.value("dbName", "AnalogExif.ael").toString();
 
@@ -221,8 +227,19 @@ bool AnalogExif::initialize()
 	ui.metadataView->setModel(exifTreeModel);
 	ui.metadataView->setItemDelegateForColumn(1, exifItemDelegate);
 
+	connect(ui.fileView->selectionModel(), &QItemSelectionModel::currentChanged,
+		[](const QModelIndex& current, const QModelIndex& previous) {
+			qDebug() << "--- Current Index Changed ---";
+			qDebug() << "From Row:" << previous.row() << "To Row:" << current.row();
+		});
+
+
+	
 	// connect to data changed signal
 	connect(exifTreeModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(modelDataChanged(const QModelIndex&, const QModelIndex&)));
+
+	connect(exifTreeModel, &QAbstractItemModel::modelReset,
+		this, &AnalogExif::modelDataReset);
 
 	connect(ui.metadataView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(metadataView_selectionChanged(const QItemSelection&, const QItemSelection&)));
 	
@@ -351,9 +368,12 @@ void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const 
 
 		if(result == QMessageBox::Cancel)
 		{
+			ui.dirView->selectionModel()->blockSignals(true);
+			ui.dirView->selectionModel()->clearSelection();
 			// select previous file
 			ui.dirView->selectionModel()->select(curDirIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 			ui.dirView->selectionModel()->setCurrentIndex(curDirIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+			ui.dirView->selectionModel()->blockSignals(false);
 
 			return;
 		}
@@ -429,20 +449,26 @@ void AnalogExif::fileView_selectionChanged(const QItemSelection&, const QItemSel
 	// map selection to original
 	QModelIndexList selIdx = ui.fileView->selectionModel()->selectedRows();
 
-	if(dirty && (previewIndex != QModelIndex()))
+	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
+		return a.row() < b.row();
+		});
+
+	if(dirty && (previewIndex.isValid()))
 	{
-		if((selIdx.count() == 1) && (previewIndex != selIdx.at(0)))
+		if((selIdx.count() == 1) && selIdx.at(0) != previewIndex)
 		{
 			QMessageBox::StandardButton result = QMessageBox::question(this, tr("Unsaved data"),
 																tr("Save changes in the current image?"),
 																QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
 																QMessageBox::Cancel);
-
 			if(result == QMessageBox::Cancel)
 			{
+				ui.fileView->selectionModel()->blockSignals(true); 
+				ui.fileView->selectionModel()->clearSelection();
 				// select previous file
 				ui.fileView->selectionModel()->select(previewIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 				ui.fileView->selectionModel()->setCurrentIndex(previewIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+				ui.fileView->selectionModel()->blockSignals(false);
 
 				return;
 			}
@@ -660,7 +686,7 @@ void AnalogExif::loadPreview(QString filename)
 	QByteArray* preview = exifTreeModel->getPreview();
 	if(preview)
 	{
-		filePreviewPixmap.loadFromData(*preview);
+		filePreviewPixmap.loadFromData(*preview, 0, Qt::ThresholdDither | Qt::NoFormatConversion);
 		delete preview;
 	}
 	else
@@ -672,14 +698,14 @@ void AnalogExif::loadPreview(QString filename)
 			return;
 
 		// show the full image otherwise
-		if(!filePreviewPixmap.load(filename, 0, Qt::ThresholdDither))
+		if(!filePreviewPixmap.load(filename, 0, Qt::ThresholdDither | Qt::NoFormatConversion))
 			return;
 	}
 
 	QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
 
 	// ui.filePreview->setPixmap(filePreviewPixmap->scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio));
-	filePreviewPixmap = filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio);
+	filePreviewPixmap = filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 #ifdef Q_WS_MAC
         // preview is loaded on the same thread under Mac
@@ -701,7 +727,7 @@ void AnalogExif::resizeEvent(QResizeEvent *)
 	if(!ui.filePreview->pixmap().isNull())
 	{
 		QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
-		ui.filePreview->setPixmap(filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio));
+		ui.filePreview->setPixmap(filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 	}
 }
 
@@ -752,35 +778,72 @@ bool AnalogExif::createBackup(QString filename, bool singleFile, QMessageBox::St
 				}
 			}
 		}
+#if 0
 		if((res == QMessageBox::Yes) || (res == QMessageBox::YesToAll))
 		{
-			///TODO 20250605
-			//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-			//QElapsedTimer timer;
-			//ProgressDialog progress(tr("Creating backup"), "Please wait...", "", this, 0, 100);
-			////QFuture<bool> future = QtConcurrent::run(QFile::copy, filename, filename + ".bak");
-			//progress.setValue(0);
+			QElapsedTimer timer;
+			ProgressDialog progress(tr("Creating backup"), "Please wait...", "", this, 0, 100);
+			QFuture<bool> future = QtConcurrent::run(QFile::copy, filename, filename + ".bak");
+			progress.setValue(0);
 
-			//while(!future.isFinished())
-			//{
-			//	if((timer.elapsed() > 500) && (!progress.isVisible()))
-			//		progress.show();
+			while(!future.isFinished())
+			{
+				if((timer.elapsed() > 500) && (!progress.isVisible()))
+					progress.show();
 
-			//	progress.setValue(timer.elapsed() / 1000);
+				progress.setValue(timer.elapsed() / 1000);
 
-			//	QCoreApplication::processEvents();
-			//	QCoreApplication::sendPostedEvents();
-			//}
+				QCoreApplication::processEvents();
+				QCoreApplication::sendPostedEvents();
+			}
 
-			//QApplication::restoreOverrideCursor();
+			QApplication::restoreOverrideCursor();
 
-			//if(!future)
-			//{
-			//	QMessageBox::critical(this, tr("Save error"), tr("Unable to create backup file:\n%1.").arg(QDir::toNativeSeparators(filename + ".bak")));
+			if(!future)
+			{
+				QMessageBox::critical(this, tr("Save error"), tr("Unable to create backup file:\n%1.").arg(QDir::toNativeSeparators(filename + ".bak")));
 	
-			//	return false;
-			//}
+				return false;
+			}
+		}
+#endif
+		if ((res == QMessageBox::Yes) || (res == QMessageBox::YesToAll))
+		{
+			QApplication::setOverrideCursor(Qt::WaitCursor);
+
+			QElapsedTimer timer;
+			timer.start();
+
+			ProgressDialog progress(tr("Creating backup"), tr("Please wait..."), QString(), this, 0, 100);
+
+			QFuture<bool> future = QtConcurrent::run([filename]() {
+				return QFile::copy(filename, filename + ".bak");
+				});
+
+			progress.setValue(0);
+
+			while (!future.isFinished())
+			{
+				if ((timer.elapsed() > 500) && (!progress.isVisible()))
+					progress.show();
+
+				progress.setValue(timer.elapsed() / 1000);
+
+				QCoreApplication::processEvents();
+			}
+
+			QApplication::restoreOverrideCursor();
+
+			if (!future.result())
+			{
+				QMessageBox::critical(this,
+					tr("Save error"),
+					tr("Unable to create backup file:\n%1.")
+					.arg(QDir::toNativeSeparators(filename + ".bak")));
+				return false;
+			}
 		}
 		prevResult = res;
 	}
@@ -801,6 +864,10 @@ bool AnalogExif::save()
 	{
 		selIdx = ui.dirView->selectionModel()->selectedRows();
 	}
+	
+	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
+		return a.row() < b.row();
+		});
 
 	// save backup answer
 	QMessageBox::StandardButton saveBkp = QMessageBox::No;
@@ -914,6 +981,12 @@ void AnalogExif::modelDataChanged(const QModelIndex&, const QModelIndex&)
 	setDirty(true);
 }
 
+// data model reset signal
+void AnalogExif::modelDataReset()
+{
+	//setDirty(true);
+}
+
 // set up tree view
 void AnalogExif::setupTreeView()
 {
@@ -967,6 +1040,7 @@ void AnalogExif::selectFilm(const QModelIndex& index)
 	{
 		QVariantList list = filmData.toList();
 		exifTreeModel->setValues(list);
+		ui.metadataView->expandAll();
 	}
 
 	filmsList->setSelectedIndex(index);
@@ -976,12 +1050,13 @@ void AnalogExif::selectGear(const QModelIndex& index)
 {
 	if(!index.isValid())
 		return;
-
+	
 	QVariant gearData = gearList->data(index, GearTreeModel::GetExifData);
 	if(gearData != QVariant())
 	{
 		QVariantList list = gearData.toList();
 		exifTreeModel->setValues(list);
+		ui.metadataView->expandAll();
 	}
 
 	gearList->setSelectedIndex(index);
@@ -997,6 +1072,7 @@ void AnalogExif::selectAuthor(const QModelIndex& index)
 	{
 		QVariantList list = authorData.toList();
 		exifTreeModel->setValues(list);
+		ui.metadataView->expandAll();
 	}
 
 	authorsList->setSelectedIndex(index);
@@ -1012,6 +1088,7 @@ void AnalogExif::selectDeveloper(const QModelIndex& index)
 	{
 		QVariantList list = devData.toList();
 		exifTreeModel->setValues(list);
+		ui.metadataView->expandAll();
 	}
 
 	developersList->setSelectedIndex(index);
@@ -1580,6 +1657,10 @@ void AnalogExif::on_actionAuto_fill_exposure_triggered(bool)
 	{
 		selIdx = ui.dirView->selectionModel()->selectedRows();
 	}
+	
+	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
+		return a.row() < b.row();
+		});
 
 	bool cancelled = false;
 
@@ -1627,6 +1708,8 @@ void AnalogExif::on_actionAuto_fill_exposure_triggered(bool)
 
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+			int sorted_int = sortedFiles.at(i + 1).toInt();
+			QString fileName2 = sortedFiles.at(i).toString();
 			QFuture<bool> future = QtConcurrent::run(&ExifTreeModel::setExposureNumber, exifTreeModel, fileName, sortedFiles.at(i+1).toInt());
 
 			while(!future.isFinished())
@@ -1675,6 +1758,9 @@ void AnalogExif::on_actionOpen_external_triggered(bool)
 	// determine the number of selected files
 	QModelIndexList selIdx = ui.fileView->selectionModel()->selectedRows();
 
+	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
+		return a.row() < b.row();
+		});
 	foreach(QModelIndex idx, selIdx)
 	{
 		openExternal(idx);
@@ -1719,6 +1805,10 @@ void AnalogExif::on_actionRemove_triggered(bool)
 	{
 		selIdx = ui.dirView->selectionModel()->selectedRows();
 	}
+	
+	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
+		return a.row() < b.row();
+		});
 
 	bool cancelled = false;
 
@@ -1823,6 +1913,10 @@ void AnalogExif::on_action_Copy_metadata_triggered(bool)
 	{
 		selIdx = ui.dirView->selectionModel()->selectedRows();
 	}
+
+	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
+		return a.row() < b.row();
+		});
 
 	QStringList fileNames = getFileList(selIdx);
 

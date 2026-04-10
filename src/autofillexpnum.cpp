@@ -38,6 +38,7 @@ AutoFillExpNum::AutoFillExpNum(QStringList& fileList, QWidget *parent)
 	{
 		QList<QStandardItem*> row;
 
+		//QStandardItem* fileNameItem = new QStandardItem(QFileInfo(fileName).fileName());
 		QStandardItem* fileNameItem = new QStandardItem(fileName);
 		fileNameItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
@@ -52,7 +53,7 @@ AutoFillExpNum::AutoFillExpNum(QStringList& fileList, QWidget *parent)
 	}
 
 	ui.fileExposures->setModel(files);
-	ui.fileExposures->setColumnWidth(0, 175);
+	ui.fileExposures->setColumnWidth(0, 300);
 
 	connect(files, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(files_dataChanged(const QModelIndex&, const QModelIndex&)));
 

@@ -142,7 +142,8 @@ QVariant OptGearTemplateModel::data(const QModelIndex &index, int role) const
 
 	if(index.column() == 4)
 	{
-		ExifItem::TagFlags flags = (ExifItem::TagFlags)data(index, GetTagFlagsRole).toInt();
+		ExifItem::TagFlags flags =
+			(ExifItem::TagFlags)QSqlQueryModel::data(index, GetTagFlagsRole).toInt();
 
 		// special care for select values
 		if(flags.testFlag(ExifItem::Choice))

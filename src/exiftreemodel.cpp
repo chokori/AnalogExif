@@ -32,6 +32,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QImageReader>
+#include <QStandardPaths>
+#include <QDir>
+#include <QMutex>
 
 #include <cmath>
 
@@ -67,6 +70,7 @@ ExifTreeModel::ExifTreeModel(QObject *parent) : QAbstractItemModel(parent)
 
 ExifTreeModel::~ExifTreeModel()
 {
+	Exiv2::XmpParser::terminate();
 	delete rootItem;
 }
 
@@ -138,21 +142,9 @@ bool ExifTreeModel::openFile(QString filename)
 	try
 	{
 		// open file using Exiv2 library
-#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
-		// unicode paths supported only in windows version
-		exifHandle = Exiv2::ImageFactory::open(filename.toUtf8().constData());
-		//exifHandle = Exiv2::ImageFactory::open(filename.toStdWString());
-		//exifHandle = Exiv2::ImageFactory::open(filename.toStdString());
-
-		//exifHandle = Exiv2::ImageFactory::open(std::string(filename.toUtf8().begin(), filename.toUtf8().end()));
-		//exifHandle = Exiv2::ImageFactory::open(std::string(filename.toUtf8().begin(), filename.toUtf8().end()));
-		//exifHandle = Exiv2::ImageFactory::open(std::string(filename.toUtf8().data()));
-
-#else
-		// convert to UTF-8
-		//exifHandle = Exiv2::ImageFactory::open(filename.toUtf8().data());
 		exifHandle = Exiv2::ImageFactory::open(filename.toStdString());
-#endif
+
+
 
 
 		if(exifHandle.get() == 0)
@@ -165,7 +157,7 @@ bool ExifTreeModel::openFile(QString filename)
 		qDebug("AnalogExif: ExifTreeModel::openFile(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
 		return false;
 	}
-
+		
 	// read all tags from model
 	if(readMetaValues())
 	{
@@ -250,23 +242,23 @@ QModelIndex ExifTreeModel::parent(const QModelIndex &index) const
 QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& itemFormat, ExifItem::TagFlags tagFlags, ExifItem::TagType itemType, int role)
 {
 	// return value according to the tag type
-	switch(itemType)
+	switch (itemType)
 	{
 	case ExifItem::TagString:
 	case ExifItem::TagText:
 	case ExifItem::TagGPS:
-		if(role == Qt::DisplayRole)
+		if (role == Qt::DisplayRole)
 		{
 			// special care for alt-Ascii values
-			if(tagFlags.testFlag(ExifItem::AsciiAlt))
+			if (tagFlags.testFlag(ExifItem::AsciiAlt))
 			{
 				QStringList strList = itemValue.toStringList();
 
-				if((strList != QStringList()) && (strList.count() > 1))
+				if ((strList != QStringList()) && (strList.count() > 1))
 				{
 					QString text = QString(itemFormat).arg(strList.at(0)).replace(QRegularExpression("(\r|\n)"), " ").replace(QRegularExpression("(\\s)+"), " ");
-					
-					if((strList.at(1) != "") && (strList.at(1) != strList.at(0)))
+
+					if ((strList.at(1) != "") && (strList.at(1) != strList.at(0)))
 						text += " (" + QString(itemFormat).arg(strList.at(1)).replace(QRegularExpression("(\r|\n)"), " ").replace(QRegularExpression("(\\s)+"), " ") + ")";
 
 					return text;
@@ -281,16 +273,21 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 				return QString(itemFormat).arg(itemValue.toString()).replace(QRegularExpression("(\r|\n)"), " ").replace(QRegularExpression("(\\s)+"), " ");
 			}
 		}
-		else if(role == Qt::EditRole)
+		else if (role == Qt::EditRole)
 			return itemValue;
 		break;
 	case ExifItem::TagInteger:
 	case ExifItem::TagUInteger:
 	case ExifItem::TagISO:
-		if(role == Qt::DisplayRole)
+		if (role == Qt::DisplayRole)
+		{
+			qDebug()<<"TagISO1:"<< QString(itemFormat).arg(itemValue.toInt());
 			return QString(itemFormat).arg(itemValue.toInt());
-		else if(role == Qt::EditRole)
+		}
+		else if(role == Qt::EditRole){
+			qDebug() << "TagISO2:" << itemValue;
 			return itemValue;
+			}
 		break;
 	case ExifItem::TagRational:
 	case ExifItem::TagURational:
@@ -549,15 +546,19 @@ bool ExifTreeModel::setData(const QModelIndex &index, const QVariant &value, int
 		else
 		{
 			newValue = processItemData(item, value, ok);
+			qDebug() << "newValue:" << newValue << "value:" << value;
 		}
 
 		if(!ok)
 			return false;
 
 		item->setValue(newValue, true);
+		qDebug() << "item:" << item->value() << "newValue:" << newValue;
 	}
 
-	emit dataChanged(index, index);
+	if (index.isValid()) {
+		emit dataChanged(index, index);
+	}
 
 	return true;
 }
@@ -627,7 +628,8 @@ QString ExifTreeModel::getGPSfromXmp()
 		QStringList latStrs = latitude.split(QChar(','));
 		if(latStrs.count() == 3)
 		{
-			if(latStrs.at(2).at(latStrs.at(2).length() - 1) == 'N')
+			//if(latStrs.at(2).at(latStrs.at(2).length() - 1) == 'N')
+			if(latStrs.at(2).length() > 0 && latStrs.at(2).at(latStrs.at(2).length() -1 ) == 'N')
 				gpsPosition = "+";
 			else
 				gpsPosition = "-";
@@ -658,7 +660,7 @@ QString ExifTreeModel::getGPSfromXmp()
 			QStringList longStrs = longitude.split(QChar(','));
 			if(longStrs.count() == 3)
 			{
-				if(longStrs.at(2).at(longStrs.at(2).length() - 1) == 'E')
+				if(longStrs.at(2).length() >0 && longStrs.at(2).at(longStrs.at(2).length() - 1) == 'E')
 					gpsPosition += "+";
 				else
 					gpsPosition += "-";
@@ -706,9 +708,15 @@ QString ExifTreeModel::getGPSfromExif()
 		{
 			Exiv2::Exifdatum& latitude = curExifData["Exif.GPSInfo.GPSLatitude"];
 
+			if (latitude.count() < 3)
+				return "";
+
 			Exiv2::Rational deg = latitude.toRational(0);
 			Exiv2::Rational min = latitude.toRational(1);
 			Exiv2::Rational sec = latitude.toRational(2);
+
+			if (sec.second == 0 || min.second == 0 || deg.second == 0)
+				return "";
 
 			double secDouble = (double)sec.first / (double)sec.second;
 
@@ -738,9 +746,16 @@ QString ExifTreeModel::getGPSfromExif()
 				if(pos != curExifData.end())
 				{
 					Exiv2::Exifdatum& longitude = curExifData["Exif.GPSInfo.GPSLongitude"];
+
+					if (longitude.count() < 3)
+						return "";
+
 					Exiv2::Rational deg = longitude.toRational(0);
 					Exiv2::Rational min = longitude.toRational(1);
 					Exiv2::Rational sec = longitude.toRational(2);
+
+					if (sec.second == 0 || min.second == 0 || deg.second == 0)
+						return "";
 
 					double secDouble = (double)sec.first / (double)sec.second;
 
@@ -792,7 +807,17 @@ QVariant ExifTreeModel::getTagValueFromExif(ExifItem::TagType tagType, const Exi
 	case Exiv2::signedShort:
 	case Exiv2::signedLong:
 	case Exiv2::undefined:
-		return QVariant::fromValue(tagValue.toInt64(pos));
+		if (tagValue.size() == 0) {
+			return QVariant();
+		}
+		try {
+			return QVariant::fromValue(tagValue.toInt64(pos));
+		}
+		catch (const Exiv2::Error& e) {
+			qDebug() << "Exiv2 Error:" << e.what();
+			return QVariant();
+		}
+
 		break;
 	case Exiv2::unsignedRational:
 	case Exiv2::signedRational:
@@ -1095,7 +1120,6 @@ bool ExifTreeModel::readMetaValues(Exiv2::Image::UniquePtr& exivHandle)
 	curExifData = exivHandle->exifData();
 	curIptcData = exivHandle->iptcData();
 	curXmpData = exivHandle->xmpData();
-
 	// sort values
 	// curExifData.sortByTag();
 	curIptcData.sortByTag();
@@ -1138,8 +1162,11 @@ void ExifTreeModel::setValues(QVariantList& values)
 
 	for(int i = 0; i < values.count(); i += 2)
 	{
-		if(rootItem->findSetTagValueFromString(values.at(i).toString(), values.at(i+1), true))
-			emit dataChanged(QModelIndex(), QModelIndex());
+		if (rootItem->findSetTagValueFromString(values.at(i).toString(), values.at(i + 1), true)) {
+			QModelIndex topLeft = index(0, 0);
+			QModelIndex bottomRight = index(rowCount() - 1, columnCount() - 1);
+			emit dataChanged(topLeft, bottomRight, { Qt::DisplayRole, Qt::EditRole });
+		}
 	}
 }
 
@@ -1322,16 +1349,14 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 		if(tagType == "Exif")
 		{
 			// Exif data
-
 			Exiv2::ExifKey exifKey(tagName.toStdString());
 
 			// erase tag if it is empty
 			if(tagValue != QVariant())
 			{
 				Exiv2::Value::UniquePtr v;
-
-				// set tag data according to its Exiv2 type
-				Exiv2::TypeId typId = Exiv2::Exifdatum(exifKey).typeId();
+			
+				Exiv2::TypeId typId = exifKey.defaultTypeId();
 
 				// special care for multivalue tag
 				if(tagFlags.testFlag(ExifItem::Multi))
@@ -1590,7 +1615,7 @@ void ExifTreeModel::QStringToExifUtf(Exiv2::Value& v, QString qstr, bool addUnic
 	}
 	else
 	{
-		utfData = QByteArray::fromRawData((char*)qstr.utf16(), qstr.length() * 2);
+		utfData = QByteArray(reinterpret_cast<const char*>(qstr.utf16()), qstr.length() * 2);
 	}
 
 	if(addUnicodeMarker)
@@ -1614,32 +1639,38 @@ QString ExifTreeModel::ExifUtfToQString(const Exiv2::Value& exifData, bool check
 	if(strSize == 0)
 		return "";
 
-	unsigned char* data = new unsigned char[strSize];
-
-	exifData.copy(data, Exiv2::littleEndian);
+	std::vector<unsigned char> buf(strSize);
+	if (strSize > 0)
+		exifData.copy(buf.data(), Exiv2::littleEndian);
 
 	QString qstr;
 
 	if(checkForMarker)
 	{
-		if(strcmp((char*)data, "UNICODE") == 0)
-			qstr = QString::fromUtf16((const ushort*)(data + 8), (strSize - 8) / 2);
-		else 
-			qstr = QString::fromLatin1((char*)(data + 8), strSize - 8);
+			if (strSize >= 8 && memcmp(buf.data(), "UNICODE", 7) == 0) {
+			int utf16Len = (strSize - 8) / 2;
+			qstr = QString::fromUtf16(reinterpret_cast<const ushort*>(buf.data() + 8), utf16Len);
+		}
+		else {
+			int latinLen = qMax(0, strSize - 8);
+			qstr = QString::fromLatin1(reinterpret_cast<const char*>(buf.data() + 8), latinLen);
+		}
 	}
 	else
 	{
-		if(isUtf8)
-		{
-			qstr = QString::fromUtf8((char*)data, strSize);
+		if (isUtf8) {
+			qstr = QString::fromUtf8(reinterpret_cast<const char*>(buf.data()), strSize);
 		}
-		else
-		{
-			qstr = QString::fromUtf16((const ushort*)data, strSize / 2);
+		else {
+			int utf16Count = strSize / 2;
+			if (utf16Count > 0) {
+				qstr = QString::fromUtf16(reinterpret_cast<const ushort*>(buf.data()), utf16Count);
+			}
+			else {
+				qstr.clear();			}
 		}
-	}
 
-	delete data;
+	}
 
 	return qstr;
 }
@@ -1711,15 +1742,7 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 {
 	try
 	{
-
-#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
-		// unicode paths are supported only in Windows verison
-	    //Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
-#else
-		// use UTF-8
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
-#endif
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
 
 	    if((image.get() == 0) || (!image->good()))
 			return false;
@@ -1753,13 +1776,21 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 			Exiv2::ExifData::const_iterator exifEnd = curExifData.end();
 			for(Exiv2::ExifData::const_iterator i = curExifData.begin(); i != exifEnd; ++i)
 			{
-				imgExifData.add(*i);
+				//imgExifData.add(*i);
+				imgExifData[i->key()] = *i;
 			}
 
 			// add/replace Iptc data
 			Exiv2::IptcData::const_iterator iptcEnd = curIptcData.end();
 			for(Exiv2::IptcData::const_iterator i = curIptcData.begin(); i != iptcEnd; ++i)
 			{
+				for (Exiv2::IptcData::iterator it = imgIptcData.begin(); it != imgIptcData.end();)
+				{
+					if (it->key() == i->key())
+						it = imgIptcData.erase(it);
+					else
+						++it;
+				}
 				imgIptcData.add(*i);
 			}
 
@@ -1771,11 +1802,16 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 			}
 
 			storeEtags(imgExifData);
+
+			image->setExifData(imgExifData);
+			image->setIptcData(imgIptcData);
+			image->setXmpData(imgXmpData);
 		}
 
 	    image->writeMetadata();
 
-		delete image.release();
+		resetDirty();
+		//delete image.release();
 	}
 	catch(Exiv2::Error& err)
 	{
@@ -1788,24 +1824,30 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 
 QByteArray* ExifTreeModel::getPreview() const
 {
-	if(!exifHandle->good())
+	if(!exifHandle || !exifHandle->good())
 		return NULL;
 
-	// load preview
-	Exiv2::PreviewManager preview(*exifHandle);
+	try {
+		// load preview
+		Exiv2::PreviewManager preview(*exifHandle);
 
-	Exiv2::PreviewPropertiesList previews = preview.getPreviewProperties();
+		Exiv2::PreviewPropertiesList previews = preview.getPreviewProperties();
 
-	if(previews.empty())
+		if (previews.empty())
+			return NULL;
+
+		// choose the smallest supported required preview
+		QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
+
+		for (Exiv2::PreviewPropertiesList::iterator i = previews.begin(); i < previews.end(); i++)
+		{
+			if (supportedImgs.contains(QString::fromStdString(i->extension_).remove(".").toLatin1()))
+				return new QByteArray((const char*)preview.getPreviewImage(*i).pData(), i->size_);
+		}
+	}
+	catch (const Exiv2::Error& e) {
+		qDebug() << "Exiv2 Preview Error:" << e.what();
 		return NULL;
-
-	// choose the smallest supported required preview
-	QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
-
-	for(Exiv2::PreviewPropertiesList::iterator i = previews.begin(); i < previews.end(); i++)
-	{
-		if(supportedImgs.contains(QString::fromStdString(i->extension_).remove(".").toLatin1()))
-			return new QByteArray((const char*)preview.getPreviewImage(*i).pData(), i->size_);
 	}
 
 	return NULL;
@@ -2013,14 +2055,7 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 
 	try
 	{
-#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
-		// unicode paths are supported only in Windows verison
-	    //Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
-#else
-		// use UTF-8
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
-#endif
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
 
 	    if((image.get() == 0) || (!image->good()))
 			return false;
@@ -2028,10 +2063,11 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 		// read meta data
 		image->readMetadata();
 
-		Exiv2::XmpData& imgXmpData = image->xmpData();
+			Exiv2::XmpData& imgXmpData = image->xmpData();
 
 		imgXmpData["Xmp.AnalogExif.ExposureNumber"] = exposure;
 
+		image->setXmpData(imgXmpData);
 		// if store etags in comments - read meta values
 		if(etagsStorageOptions)
 		{
@@ -2047,7 +2083,8 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 
 		image->writeMetadata();
 
-		delete image.release();
+		resetDirty();
+		//delete image.release();
 	}
 	catch (Exiv2::Error& err)
 	{
@@ -2064,14 +2101,7 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 
 	try
 	{
-#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
-		// unicode paths are supported only in Windows verison
-	    //Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdWString());
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
-#else
-		// use UTF-8
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toUtf8().data());
-#endif
+		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
 
 	    if((image.get() == 0) || (!image->good()))
 			return false;
@@ -2116,9 +2146,13 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 			storeEtags(image->exifData());
 		}
 
+		image->setExifData(exifData);
+		image->setIptcData(iptcData);
+		image->setXmpData(xmpData);
+
 		image->writeMetadata();
 
-		delete image.release();
+		//delete image.release();
 	}
 	catch (Exiv2::Error& err)
 	{

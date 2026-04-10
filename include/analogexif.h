@@ -197,6 +197,8 @@ private slots:
 	void filmAndGearView_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	// changed data in the model
 	void modelDataChanged(const QModelIndex&, const QModelIndex&);
+	// reset data in the model
+	void modelDataReset();
 	// on close
 	void closeEvent(QCloseEvent *event);
 	// on options

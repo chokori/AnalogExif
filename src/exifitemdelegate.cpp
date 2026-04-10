@@ -420,14 +420,15 @@ void ExifItemDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 				return;
 
 			int i = value.toInt();
-
 			QComboBox* combo = static_cast<QComboBox*>(editor);
 
 			int position = combo->findText(QString::number(i));
 			if(position < 0)
 				combo->setEditText(QString::number(i));
 			else
+			{
 				combo->setCurrentIndex(position);
+			}
 		}
 		break;
 
@@ -806,8 +807,9 @@ void ExifItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 			bool ok = false;
 			int value = text.toInt(&ok);
 
-			if(ok)
+			if (ok) {
 				model->setData(index, value);
+			}
 		}
 		break;
 
