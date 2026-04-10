@@ -125,7 +125,7 @@ QTreeView::item:selected:!active{
 }</string>
           </property>
           <property name="editTriggers">
-           <set>QAbstractItemView::EditTrigger::EditKeyPressed|QAbstractItemView::EditTrigger::SelectedClicked</set>
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
           </property>
           <property name="dragDropMode">
            <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
@@ -194,6 +194,9 @@ QListView::item:focus {
     border: none;
     outline: none;
 }</string>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
           </property>
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
