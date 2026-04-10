@@ -106,6 +106,7 @@ set(UI_FILES
 
 set(RESOURCES
    res/analogexif.qrc
+   res/AnalogEXif.rc
 )
 
 qt_add_executable(AnalogExif WIN32
