@@ -281,13 +281,12 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 	case ExifItem::TagISO:
 		if (role == Qt::DisplayRole)
 		{
-			qDebug()<<"TagISO1:"<< QString(itemFormat).arg(itemValue.toInt());
 			return QString(itemFormat).arg(itemValue.toInt());
 		}
-		else if(role == Qt::EditRole){
-			qDebug() << "TagISO2:" << itemValue;
+		else if(role == Qt::EditRole)
+		{
 			return itemValue;
-			}
+		}
 		break;
 	case ExifItem::TagRational:
 	case ExifItem::TagURational:
@@ -546,14 +545,12 @@ bool ExifTreeModel::setData(const QModelIndex &index, const QVariant &value, int
 		else
 		{
 			newValue = processItemData(item, value, ok);
-			qDebug() << "newValue:" << newValue << "value:" << value;
 		}
 
 		if(!ok)
 			return false;
 
 		item->setValue(newValue, true);
-		qDebug() << "item:" << item->value() << "newValue:" << newValue;
 	}
 
 	if (index.isValid()) {

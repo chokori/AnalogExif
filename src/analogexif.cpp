@@ -226,14 +226,13 @@ bool AnalogExif::initialize()
 
 	ui.metadataView->setModel(exifTreeModel);
 	ui.metadataView->setItemDelegateForColumn(1, exifItemDelegate);
-
+#if 0
 	connect(ui.fileView->selectionModel(), &QItemSelectionModel::currentChanged,
 		[](const QModelIndex& current, const QModelIndex& previous) {
 			qDebug() << "--- Current Index Changed ---";
 			qDebug() << "From Row:" << previous.row() << "To Row:" << current.row();
 		});
-
-
+#endif
 	
 	// connect to data changed signal
 	connect(exifTreeModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(modelDataChanged(const QModelIndex&, const QModelIndex&)));
@@ -704,7 +703,6 @@ void AnalogExif::loadPreview(QString filename)
 
 	QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
 
-	// ui.filePreview->setPixmap(filePreviewPixmap->scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio));
 	filePreviewPixmap = filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 #ifdef Q_WS_MAC
