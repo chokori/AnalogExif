@@ -6,6 +6,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_AUTOUIC_SEARCH_PATHS "ui")
+set(CMAKE_AUTORCC_SEARCH_PATHS "res")
+
 # Qt 6.11 modules
 find_package(Qt6 6.11 REQUIRED COMPONENTS
     Widgets
@@ -14,106 +17,105 @@ find_package(Qt6 6.11 REQUIRED COMPONENTS
     Concurrent
 )
 
-# Qt SQLite plugin (built-in)
-find_package(Qt6 REQUIRED COMPONENTS Sql)
-
 # Exiv2 + Expat (vcpkg)
-find_package(exiv2 REQUIRED)
-find_package(EXPAT REQUIRED)
+find_package(exiv2 0.28.8 EXACT REQUIRED)
+find_package(EXPAT 2.7.4 REQUIRED)
 
 # Sources
 set(SOURCES
-    aboutdialog.cpp
-    analogexif.cpp
-    analogexifoptions.cpp
-    autofillexpnum.cpp
-    copymetadatadialog.cpp
-    dirsortfilterproxymodel.cpp
-    editgear.cpp
-    editgeartagsmodel.cpp
-    editgeartreemodel.cpp
-    edittagselectvalues.cpp
-    exifitem.cpp
-    exifitemdelegate.cpp
-    exiftreemodel.cpp
-    exifutils.cpp
-    gearlistmodel.cpp
-    geartreemodel.cpp
-    main.cpp
-    metadatatagcompleter.cpp
-    multitagvaluesdialog.cpp
-    onlineversionchecker.cpp
-    optgeartemplatemodel.cpp
-    progressdialog.cpp
-    tagnameitemdelegate.cpp
-    tagselectvalsitemdelegate.cpp
-    tagtypeitemdelegate.cpp
-    asciitextdialog.cpp
-    asciistringdialog.cpp
-    tagnameeditdialog.cpp
+    src/aboutdialog.cpp
+    src/analogexif.cpp
+    src/analogexifoptions.cpp
+    src/autofillexpnum.cpp
+    src/copymetadatadialog.cpp
+    src/dirsortfilterproxymodel.cpp
+    src/editgear.cpp
+    src/editgeartagsmodel.cpp
+    src/editgeartreemodel.cpp
+    src/edittagselectvalues.cpp
+    src/exifitem.cpp
+    src/exifitemdelegate.cpp
+    src/exiftreemodel.cpp
+    src/exifutils.cpp
+    src/gearlistmodel.cpp
+    src/geartreemodel.cpp
+    src/main.cpp
+    src/metadatatagcompleter.cpp
+    src/multitagvaluesdialog.cpp
+    src/onlineversionchecker.cpp
+    src/optgeartemplatemodel.cpp
+    src/progressdialog.cpp
+    src/tagnameitemdelegate.cpp
+    src/tagselectvalsitemdelegate.cpp
+    src/tagtypeitemdelegate.cpp
+    src/asciitextdialog.cpp
+    src/asciistringdialog.cpp
+    src/tagnameeditdialog.cpp
 )
 
 set(HEADERS
-    aboutdialog.h
-    analogexif.h
-    analogexifoptions.h
-    autofillexpnum.h
-    checkedgeartreeview.h
-    copymetadatadialog.h
-    dirsortfilterproxymodel.h
-    editgear.h
-    editgeartagsmodel.h
-    editgeartreemodel.h
-    edittagselectvalues.h
-    emptyspinbox.h
-    exifitem.h
-    exifitemdelegate.h
-    exiftreemodel.h
-    exifutils.h
-    gearlistmodel.h
-    gearlistview.h
-    geartableview.h
-    geartreemodel.h
-    geartreeview.h
-    metadatatagcompleter.h
-    multitagvaluesdialog.h
-    onlineversionchecker.h
-    optgeartemplatemodel.h
-    optgeartemplateview.h
-    progressdialog.h
-    tagnameitemdelegate.h
-    tagselectvalsitemdelegate.h
-    tagtypeitemdelegate.h
-    asciitextdialog.h
-    asciistringdialog.h
-    tagnameeditdialog.h
+    include/aboutdialog.h
+    include/analogexif.h
+    include/analogexifoptions.h
+    include/autofillexpnum.h
+    include/checkedgeartreeview.h
+    include/copymetadatadialog.h
+    include/dirsortfilterproxymodel.h
+    include/editgear.h
+    include/editgeartagsmodel.h
+    include/editgeartreemodel.h
+    include/edittagselectvalues.h
+    include/emptyspinbox.h
+    include/exifitem.h
+    include/exifitemdelegate.h
+    include/exiftreemodel.h
+    include/exifutils.h
+    include/gearlistmodel.h
+    include/gearlistview.h
+    include/geartableview.h
+    include/geartreemodel.h
+    include/geartreeview.h
+    include/metadatatagcompleter.h
+    include/multitagvaluesdialog.h
+    include/onlineversionchecker.h
+    include/optgeartemplatemodel.h
+    include/optgeartemplateview.h
+    include/progressdialog.h
+    include/tagnameitemdelegate.h
+    include/tagselectvalsitemdelegate.h
+    include/tagtypeitemdelegate.h
+    include/asciitextdialog.h
+    include/asciistringdialog.h
+    include/tagnameeditdialog.h
 )
 
-set(FORMS
-    analogexifoptions.ui
-    autofillexpnum.ui
-    copymetadatadialog.ui
-    edittagselectvalues.ui
-    multitagvaluesdialog.ui
-    progressdialog.ui
-    tagnameeditdialog.ui
-    aboutdialog.ui
-    analogexif.ui
-    editgear.ui
-    asciistringdialog.ui
-    asciitextdialog.ui
+set(UI_FILES
+    ui/analogexifoptions.ui
+    ui/autofillexpnum.ui
+    ui/copymetadatadialog.ui
+    ui/edittagselectvalues.ui
+    ui/multitagvaluesdialog.ui
+    ui/progressdialog.ui
+    ui/tagnameeditdialog.ui
+    ui/aboutdialog.ui
+    ui/analogexif.ui
+    ui/editgear.ui
+    ui/asciistringdialog.ui
+    ui/asciitextdialog.ui
 )
 
 set(RESOURCES
-    analogexif.qrc
+   res/analogexif.qrc
 )
 
-add_executable(AnalogExif
+qt_add_executable(AnalogExif WIN32
     ${SOURCES}
     ${HEADERS}
-    ${FORMS}
+    ${UI_FILES}
     ${RESOURCES}
 )
+
+target_include_directories(AnalogExif PRIVATE include)
 
 target_link_libraries(AnalogExif PRIVATE
     Qt6::Widgets
@@ -126,6 +128,9 @@ target_link_libraries(AnalogExif PRIVATE
 
 # macOS icon
 if(APPLE)
-    set_source_files_properties(AnalogExif.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-    target_sources(AnalogExif PRIVATE AnalogExif.icns)
+    set_source_files_properties(res/AnalogExif.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    target_sources(AnalogExif PRIVATE res/AnalogExif.icns)
+    set_target_properties(AnalogExif PROPERTIES
+    MACOSX_BUNDLE_ICON_FILE AnalogExif.icns
+    MACOSX_BUNDLE TRUE)
 endif()

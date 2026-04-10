@@ -22,4 +22,7 @@
 /version.xml
 /release/
 /AnalogExif.pro.user
-
+AnalogExif.sln
+AnalogExif.vcproj*
+AnalogExif.vcxproj*
+.qmake.stash
