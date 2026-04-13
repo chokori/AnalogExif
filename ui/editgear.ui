@@ -69,7 +69,28 @@
 QTreeView::item:selected:!active{
 	selection-color:						palette(highlighted-text);
 	selection-background-color:	palette(highlight);
-}</string>
+    background-color: #e0e0e0;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+}
+
+QTreeView::item:hover {
+    background-color: #f1f4f9;
+    color: #333333;
+}
+
+QTreeView::item:selected:active {
+    background-color: #d1e6f7;
+    color: #005a9e;
+    border: 1px solid #a8c9e5;
+}
+
+QTreeView::item:focus {
+    border: none;
+    outline: none;
+}
+
+</string>
           </property>
           <property name="dragEnabled">
            <bool>true</bool>
@@ -97,6 +118,9 @@ QTreeView::item:selected:!active{
           </property>
           <attribute name="headerVisible">
            <bool>false</bool>
+          </attribute>
+          <attribute name="headerMinimumSectionSize">
+           <number>30</number>
           </attribute>
           <attribute name="headerStretchLastSection">
            <bool>true</bool>
@@ -134,7 +158,28 @@ QTreeView::item:selected:!active{
 QListView::item:selected:!active{
 	selection-color:						palette(highlighted-text);
 	selection-background-color:	palette(highlight);
-}</string>
+    background-color: #e0e0e0;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+}
+
+QListView::item:hover {
+    background-color: #f1f4f9;
+    color: #333333;
+}
+
+QListView::item:selected:active {
+    background-color: #d1e6f7;
+    color: #005a9e;
+    border: 1px solid #a8c9e5;
+}
+
+QListView::item:focus {
+    border: none;
+    outline: none;
+}
+
+</string>
           </property>
           <property name="dragEnabled">
            <bool>true</bool>
@@ -175,7 +220,28 @@ QListView::item:selected:!active{
 QListView::item:selected:!active{
 	selection-color:						palette(highlighted-text);
 	selection-background-color:	palette(highlight);
-}</string>
+    background-color: #e0e0e0;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+}
+
+QListView::item:hover {
+    background-color: #f1f4f9;
+    color: #333333;
+}
+
+QListView::item:selected:active {
+    background-color: #d1e6f7;
+    color: #005a9e;
+    border: 1px solid #a8c9e5;
+}
+
+QListView::item:focus {
+    border: none;
+    outline: none;
+}
+
+</string>
           </property>
           <property name="dragEnabled">
            <bool>true</bool>
@@ -216,7 +282,40 @@ QListView::item:selected:!active{
 QListView::item:selected:!active{
 	selection-color:						palette(highlighted-text);
 	selection-background-color:	palette(highlight);
-}</string>
+    background-color: #e0e0e0;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+}
+
+QListView::item:hover {
+    background-color: #f1f4f9;
+    color: #333333;
+}
+
+QListView::item:selected:active {
+    background-color: #d1e6f7;
+    color: #005a9e;
+    border: 1px solid #a8c9e5;
+}
+
+QListView::item:focus {
+    border: none;
+    outline: none;
+}
+
+</string>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::DropAction::MoveAction</enum>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -543,6 +642,34 @@ QListView::item:selected:!active{
           <property name="contextMenuPolicy">
            <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
           </property>
+          <property name="styleSheet">
+           <string notr="true">/* keep selection even when focus is lost */
+QTableView::item:selected:!active{
+	selection-color:						palette(highlighted-text);
+	selection-background-color:	palette(highlight);
+    background-color: #e0e0e0;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+}
+
+QTableView::item:hover {
+    background-color: #f1f4f9;
+    color: #333333;
+}
+
+QTableView::item:selected:active {
+    background-color: #d1e6f7;
+    color: #005a9e;
+    border: 1px solid #a8c9e5;
+}
+
+QTableView::item:focus {
+    border: none;
+    outline: none;
+}
+
+</string>
+          </property>
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
           </property>
@@ -584,12 +711,6 @@ QListView::item:selected:!active{
           </attribute>
           <attribute name="verticalHeaderCascadingSectionResizes">
            <bool>false</bool>
-          </attribute>
-          <attribute name="verticalHeaderMinimumSectionSize">
-           <number>13</number>
-          </attribute>
-          <attribute name="verticalHeaderDefaultSectionSize">
-           <number>13</number>
           </attribute>
          </widget>
         </item>

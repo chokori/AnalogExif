@@ -182,12 +182,13 @@ bool EditGearTreeModel::dropMimeData(const QMimeData *data, Qt::DropAction actio
 				continue;
 		}
 
-		if((gearType == 1) && (parentGearType == 0))
+		if((gearType == 1) && (parentGearType == 0))//Change Lens order
 		{
 			// assign new order by and possibly parent
 			query.exec(QString("UPDATE UserGearItems SET ParentId = %1, OrderBy = %2 WHERE id = %3").arg(parent.data(GetGearIdRole).toInt()).arg(beginRow).arg(gearId));
 		}
-		else if(((gearType == 0) || (gearType == 2)) && (parentGearType == -1))
+		//gearType 0 : Camera, 2 : Film, 3 : Devloepr, 4 : Authors
+		else if(((gearType == 0) || (gearType == 2) || (gearType == 3) || (gearType == 4)) && (parentGearType == -1))
 		{
 			// update orderby
 			query.exec(QString("UPDATE UserGearItems SET OrderBy = %1 WHERE id = %2").arg(beginRow).arg(gearId));
