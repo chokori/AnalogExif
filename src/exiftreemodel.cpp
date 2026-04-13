@@ -350,8 +350,8 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 		{
 			if(role == Qt::DisplayRole)
 			{
-				QLocale locale;
-				return itemValue.toDateTime().toString(locale.dateFormat(QLocale::ShortFormat));
+				QLocale locale; 
+				return itemValue.toDateTime().toString("yyyy-MM-dd HH:mm:ss");
 			}
 		}
 		break;

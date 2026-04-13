@@ -226,13 +226,6 @@ bool AnalogExif::initialize()
 
 	ui.metadataView->setModel(exifTreeModel);
 	ui.metadataView->setItemDelegateForColumn(1, exifItemDelegate);
-#if 0
-	connect(ui.fileView->selectionModel(), &QItemSelectionModel::currentChanged,
-		[](const QModelIndex& current, const QModelIndex& previous) {
-			qDebug() << "--- Current Index Changed ---";
-			qDebug() << "From Row:" << previous.row() << "To Row:" << current.row();
-		});
-#endif
 	
 	// connect to data changed signal
 	connect(exifTreeModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(modelDataChanged(const QModelIndex&, const QModelIndex&)));
