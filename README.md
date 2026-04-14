@@ -28,3 +28,13 @@ https://github.com/chokori/analogexif
   - `xmp`
 - Expat 2.7.4
 - QT6.11
+
+
+## Build
+### Debug
+cmake --preset x64-debug
+cmake --build build/debug --config Debug
+
+### Release
+cmake --build build/debug --config Debug
+cmake --build build/debug --config Debug
