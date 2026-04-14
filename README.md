@@ -22,12 +22,16 @@ https://github.com/chokori/analogexif
 
 ## 📦 Dependencies
 
+*(Both Exiv2 and Expat are automatically managed through vcpkg — no manual installation required.)*
 - Exiv2 0.28.0 with features:
   - `bmff`
   - `png`
   - `xmp`
 - Expat 2.7.4
+
 - QT6.11
+*Qt is **not** installed automatically. You must install Qt 6.11 manually and set the `QTDIR` environment variable.*
+
 
 
 ## Build
@@ -55,3 +59,9 @@ cmake --build build/debug --config Debug
 cmake --preset x64-release
 cmake --build build/release --config Release
 ```
+
+## Database Error
+
+If you encounter a database error on first launch, select the default database located at:
+
+**/res/db/AnalogExif.ael**
