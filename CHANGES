@@ -1,3 +1,6 @@
+Change from 0.0.4
+* QT6, EXiv2, Cmake
+
 Changes from 0.0.4 (build 5 Windows)
 * Windows version was properly moved to Exiv2 0.20, which should fix
   previous 0.0.3 issues.
