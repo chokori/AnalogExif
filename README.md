@@ -31,10 +31,21 @@ https://github.com/chokori/analogexif
 
 
 ## Build
-### Debug
+### 0. Use the correct environment
+
+Before building, open:
+
+**x64 Native Tools Command Prompt for VS 2022**
+
+This ensures the correct MSVC compiler, environment variables, and toolchain are available.
+
+### 1. Initialize submodules
+git submodule update --init --recursive
+
+### 2. Debug build
 cmake --preset x64-debug
 cmake --build build/debug --config Debug
 
-### Release
-cmake --build build/debug --config Debug
-cmake --build build/debug --config Debug
+### 3. Release build
+cmake --preset x64-release
+cmake --build build/release --config Release
