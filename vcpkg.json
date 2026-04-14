@@ -1,0 +1,13 @@
+{
+	"name": "analogexif",
+	"version": "1.0.0",
+	"dependencies": [
+		{
+			"name": "exiv2",
+			"features": [ "bmff", "png", "xmp" ]
+		},
+		"expat",
+		"qtbase",
+		"qttools"
+	]
+}
