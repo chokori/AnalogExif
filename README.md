@@ -80,10 +80,10 @@ This project uses **CMake** and **CPack** to generate a Windows installer (.exe)
 ### Build and Packaging Steps
 
 1. **Clone the repository**
-   ```
+```
 git clone [https://github.com/chokori/AnalogExif.git](https://github.com/chokori/AnalogExif.git)
 cd AnalogExif
-   ```
+```
 2. Configure the project Replace [vcpkg root] with your actual vcpkg installation path.
 ```
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=./external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
