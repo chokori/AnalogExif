@@ -18,7 +18,7 @@ find_package(Qt6 6.11 REQUIRED COMPONENTS
 )
 
 # Exiv2 + Expat (vcpkg)
-find_package(exiv2 0.28.8 EXACT REQUIRED)
+find_package(exiv2 0.28.8 REQUIRED)
 find_package(EXPAT 2.7.4 REQUIRED)
 
 # Sources
