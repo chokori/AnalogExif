@@ -137,6 +137,8 @@ if(APPLE)
     MACOSX_BUNDLE TRUE)
 endif()
 
+
+
 if(WIN32)
     get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
     get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
@@ -144,24 +146,64 @@ if(WIN32)
 
     add_custom_command(TARGET AnalogExif POST_BUILD
         COMMAND "${WINDEPLOYQT_EXECUTABLE}"
-                --verbose 1
                 --no-compiler-runtime
+                --no-svg
+                --no-translations
+                --verbose 0
                 \"$<TARGET_FILE:AnalogExif>\"
-        COMMENT "Deploying Qt dependencies..."
     )
 
-    install(TARGETS AnalogExif DESTINATION bin)
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/"
-            DESTINATION bin
-            FILES_MATCHING PATTERN "*.dll")
+	configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael
+    ${CMAKE_CURRENT_BINARY_DIR}/AnalogExif.ael
+    COPYONLY
+	)
+
+    install(TARGETS AnalogExif RUNTIME DESTINATION .)
+    
+	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael" 
+            DESTINATION "db_temp")
+			
+	install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/"
+            DESTINATION .
+            FILES_MATCHING 
+            PATTERN "*.dll"           
+            PATTERN "platforms/*"     
+            PATTERN "styles/*"
+            PATTERN "imageformats/*"
+            PATTERN "Debug" EXCLUDE
+            PATTERN "*_autogen" EXCLUDE 
+            PATTERN "CMakeFiles" EXCLUDE
+            PATTERN "db_install" EXCLUDE
+            PATTERN "_CPack_Packages" EXCLUDE)
+
+	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+        SetShellVarContext current
+        IfFileExists '$DOCUMENTS/AnalogExif/AnalogExif.ael' db_exists
+            CreateDirectory '$DOCUMENTS/AnalogExif'
+            CopyFiles '$INSTDIR/db_temp/AnalogExif.ael' '$DOCUMENTS/AnalogExif/AnalogExif.ael'
+            goto copy_done
+        db_exists:
+            DetailPrint 'Database file already exists. Skipping copy.'
+        copy_done:
+        RMDir /r '$INSTDIR/db_temp'
+    ")
+	
+    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+        SetShellVarContext current
+        MessageBox MB_YESNO|MB_ICONQUESTION 'Delete the database file in your Documents?' /SD IDNO IDNO NoDelete
+            Delete '$DOCUMENTS/AnalogExif/AnalogExif.ael'
+            RMDir '$DOCUMENTS/AnalogExif'
+        NoDelete:
+    ")
 
     set(CPACK_PACKAGE_NAME "AnalogExif")
-    set(CPACK_PACKAGE_VENDOR "Chokori")
+    set(CPACK_PACKAGE_VENDOR "chokori")
     set(CPACK_PACKAGE_VERSION "1.0.0")
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "AnalogExif")
-    
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP\\AnalogExif.lnk' '$INSTDIR\\bin\\AnalogExif.exe'")
+    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP/AnalogExif.lnk' '$INSTDIR/AnalogExif.exe'")
     
     include(CPack)
 endif()
