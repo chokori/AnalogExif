@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
+set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 project(AnalogExif LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -134,4 +135,33 @@ if(APPLE)
     set_target_properties(AnalogExif PROPERTIES
     MACOSX_BUNDLE_ICON_FILE AnalogExif.icns
     MACOSX_BUNDLE TRUE)
+endif()
+
+if(WIN32)
+    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+
+    add_custom_command(TARGET AnalogExif POST_BUILD
+        COMMAND "${WINDEPLOYQT_EXECUTABLE}"
+                --verbose 1
+                --no-compiler-runtime
+                \"$<TARGET_FILE:AnalogExif>\"
+        COMMENT "Deploying Qt dependencies..."
+    )
+
+    install(TARGETS AnalogExif DESTINATION bin)
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/"
+            DESTINATION bin
+            FILES_MATCHING PATTERN "*.dll")
+
+    set(CPACK_PACKAGE_NAME "AnalogExif")
+    set(CPACK_PACKAGE_VENDOR "Chokori")
+    set(CPACK_PACKAGE_VERSION "1.0.0")
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "AnalogExif")
+    
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$DESKTOP\\AnalogExif.lnk' '$INSTDIR\\bin\\AnalogExif.exe'")
+    
+    include(CPack)
 endif()

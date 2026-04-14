@@ -65,3 +65,37 @@ cmake --build build/release --config Release
 If you encounter a database error on first launch, select the default database located at:
 
 **/res/db/AnalogExif.ael**
+
+
+## 🚀 How to Build and Package (Windows)
+
+This project uses **CMake** and **CPack** to generate a Windows installer (.exe). To include all dependencies (Qt6, Exiv2, Expat), follow these steps:
+
+### Prerequisites
+1. **Visual Studio 2022** (with C++ Desktop Development workload)
+2. **CMake** (3.21 or higher)
+3. **vcpkg**: For managing `exiv2` and `expat`.
+4. **NSIS**: Required to generate the `.exe` installer. [Download NSIS](https://sourceforge.net/projects/nsis/)
+
+### Build and Packaging Steps
+
+1. **Clone the repository**
+   ```
+git clone [https://github.com/chokori/AnalogExif.git](https://github.com/chokori/AnalogExif.git)
+cd AnalogExif
+   ```
+2. Configure the project Replace [vcpkg root] with your actual vcpkg installation path.
+```
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=./external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
+```
+3. Build the project
+```
+cmake --build build --config Release
+```
+4. Generate the Installer (.exe)
+```
+cd build
+cpack -C Release
+```
+5. Result
+You will find the installer (e.g., AnalogExif-1.0.0-win64.exe) in the build directory.
