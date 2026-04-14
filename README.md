@@ -40,6 +40,7 @@ Before building, open:
 This ensures the correct MSVC compiler, environment variables, and toolchain are available.
 
 ### 1. Initialize submodules
+```bash
 git submodule update --init --recursive
 
 ### 2. Debug build
@@ -49,3 +50,4 @@ cmake --build build/debug --config Debug
 ### 3. Release build
 cmake --preset x64-release
 cmake --build build/release --config Release
+```
