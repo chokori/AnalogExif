@@ -39,3 +39,31 @@
 
 # debug information files
 *.dwo
+/release/
+/build/
+/.qmake.stash
+/.vs/
+/AnalogExif.nsh
+/Backup/AnalogExif.sln
+/Debug/
+/UpgradeLog.htm
+/release/moc_predefs.h.cbt
+/ui_aboutdialog.h
+/ui_analogexif.h
+/ui_analogexifoptions.h
+/ui_asciistringdialog.h
+/ui_asciitextdialog.h
+/ui_autofillexpnum.h
+/ui_copymetadatadialog.h
+/ui_editgear.h
+/ui_edittagselectvalues.h
+/ui_multitagvaluesdialog.h
+/ui_progressdialog.h
+/ui_tagnameeditdialog.h
+/version.xml
+/release/
+/AnalogExif.pro.user
+AnalogExif.sln
+AnalogExif.vcproj*
+AnalogExif.vcxproj*
+.qmake.stash

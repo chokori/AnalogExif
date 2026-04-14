@@ -1,0 +1,28 @@
+Changes from 0.0.4 (build 5 Windows)
+* Windows version was properly moved to Exiv2 0.20, which should fix
+  previous 0.0.3 issues.
+
+Changes from 0.0.3 (build 4)
+* Moved to Exiv2 0.20 (see http://www.exiv2.org/changelog.html for list
+  of the related updates)
+* Fix TIFF file truncation (bug 3040425)
+* Fix incorrect display of date and time metadata (bug 3042261)
+* Show messages on database errors
+* Fix new equipment library read-only state (bug 3042259)
+* Arrow keys in multiple values dialog are no longer move current item
+
+Changes from 0.0.1 (build 3)
+* Fix incorrect floating point conversion under gcc for APEX aperture metadata,
+  e.g. Maximum aperture (bug 3035568)
+* Fix incorrect behaviour when Escape key was pressed in dialogs (bug 3034869)
+* Add DNG, Photoshop PSD, JPEG2000 edit support and camera raw read support
+  (CR2, NEF, PEF, ARW, RW2, SR2, ORF, RAF, MRW)
+* Allow multi-selection in the metadata editor (to clear tags)
+* Reload metadata and deselect equipment after preferences, equipment library
+  or other modification dialogs were invoked.
+* Ask to save changes for all cases when equipment or metadata may be applied
+* Fix crash when selected equipment edited in the equipment (bug 3036087)
+
+Changes from 0.0.1 (build 2)
+* Install default equipment library to the user folder (fixes disabled
+  equipment edit on Vista and Windows7)
