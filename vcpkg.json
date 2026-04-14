@@ -6,8 +6,6 @@
 			"name": "exiv2",
 			"features": [ "bmff", "png", "xmp" ]
 		},
-		"expat",
-		"qtbase",
-		"qttools"
+		"expat"
 	]
 }

@@ -9,7 +9,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_FEATURE_FLAGS":  "manifests"
+        "CMAKE_PREFIX_PATH": "$env{QTDIR}",
+        "VCPKG_FEATURE_FLAGS": "manifests"
       }
     },
     {
@@ -20,13 +21,15 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_FEATURE_FLAGS":  "manifests"
+        "CMAKE_PREFIX_PATH": "$env{QTDIR}",
+        "VCPKG_FEATURE_FLAGS": "manifests"
       }
     },
     {
       "hidden": true,
       "name": "Qt",
       "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "$env{QTDIR}"
       },
       "vendor": {
         "qt-project.org/Qt": {
@@ -37,7 +40,7 @@
   ],
   "vendor": {
     "qt-project.org/Presets": {
-      "checksum": "8OdCQAJcqTw3sVlr4apb4y3wQ00="
+      "checksum": "/mUvHPwIweET72Pr1K64VzPM2Lc="
     }
   }
 }
