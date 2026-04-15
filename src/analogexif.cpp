@@ -39,7 +39,7 @@
 #include <QImageReader>
 #include <QElapsedTimer>
 
-#if defined(Q_WS_WIN) || defined(Q_OS_WIN)
+#if defined(Q_OS_WIN)
 #include <windows.h>
 #endif
 
@@ -115,9 +115,9 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 
 	setWindowTitle(QCoreApplication::applicationName());
 
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
 	// connect preview updates
-	connect(this, SIGNAL(updatePreview()), this, SLOT(previewUpdate()), Qt::BlockingQueuedConnection);
+	connect(this, &AnalogExif::updatePreview, this, &AnalogExif::previewUpdate, Qt::BlockingQueuedConnection);
 #endif
 
 	contextMenus.clear();
@@ -127,8 +127,8 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 	ui.dirView->addActions(contextMenus);
 
 	verChecker = new OnlineVersionChecker(this);
-	connect(verChecker, SIGNAL(newVersionAvailable(QString, QString, QDateTime, QString)), this, SLOT(newVersionAvailable(QString, QString, QDateTime, QString)));
-	connect(verChecker, SIGNAL(newVersionCheckError(QNetworkReply::NetworkError)), this, SLOT(newVersionCheckError(QNetworkReply::NetworkError)));
+	connect(verChecker, &OnlineVersionChecker::newVersionAvailable, this, &AnalogExif::newVersionAvailable);
+	connect(verChecker, &OnlineVersionChecker::newVersionCheckError, this, &AnalogExif::newVersionCheckError);
 
 #if defined(Q_WS_WIN) || defined(Q_OS_WIN)
 	//if(QSysInfo::windowsVersion() >= QSysInfo::WV_VISTA)
@@ -228,12 +228,11 @@ bool AnalogExif::initialize()
 	ui.metadataView->setItemDelegateForColumn(1, exifItemDelegate);
 	
 	// connect to data changed signal
-	connect(exifTreeModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(modelDataChanged(const QModelIndex&, const QModelIndex&)));
+	connect(exifTreeModel, &ExifTreeModel::dataChanged, this, &AnalogExif::modelDataChanged);
 
-	connect(exifTreeModel, &QAbstractItemModel::modelReset,
-		this, &AnalogExif::modelDataReset);
+	connect(exifTreeModel, &QAbstractItemModel::modelReset,this, &AnalogExif::modelDataReset);
 
-	connect(ui.metadataView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(metadataView_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.metadataView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExif::metadataView_selectionChanged);
 	
 	// span the categories to full row
 	setupTreeView();
@@ -243,27 +242,27 @@ bool AnalogExif::initialize()
 	filmsList->reload();
 
 	ui.filmView->setModel(filmsList);
-	connect(ui.filmView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(filmAndGearView_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.filmView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExif::filmAndGearView_selectionChanged);
 
 	// authors view
 	authorsList = new GearListModel(this, 4, tr("No authors defined"));
 	authorsList->reload();
 
 	ui.authorView->setModel(authorsList);
-	connect(ui.authorView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(filmAndGearView_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.authorView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExif::filmAndGearView_selectionChanged);
 
 	// developers view
 	developersList = new GearListModel(this, 3, tr("No developers defined"));
 	developersList->reload();
 
 	ui.developerView->setModel(developersList);
-	connect(ui.developerView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(filmAndGearView_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.developerView->selectionModel(), &QItemSelectionModel::selectionChanged,this, &AnalogExif::filmAndGearView_selectionChanged);
 
 	// gear view
 	gearList = new GearTreeModel(this);
 	gearList->reload();
 	ui.gearView->setModel(gearList);
-	connect(ui.gearView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(filmAndGearView_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.gearView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExif::filmAndGearView_selectionChanged);
 
 	filmsList->setApplicable(true);
 	gearList->setApplicable(true);
@@ -285,8 +284,8 @@ bool AnalogExif::initialize()
 
 	ui.dirView->showColumn(0);
 
-	connect(ui.dirView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(dirView_selectionChanged(const QItemSelection&, const QItemSelection&)));
-	connect(ui.fileView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(fileView_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.dirView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExif::dirView_selectionChanged);
+	connect(ui.fileView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExif::fileView_selectionChanged);
 
 	QString lastFolder = settings.value("lastFolder", QDir::homePath()).toString();
 	if(lastFolder == "")
@@ -297,7 +296,7 @@ bool AnalogExif::initialize()
 		ui.directoryLine->setText(QDir::toNativeSeparators(lastFolder));
 		ui.dirView->setCurrentIndex(curDirIndex);
 		ui.dirView->setExpanded(curDirIndex, true);
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
 		QTimer::singleShot(200, this, SLOT(scrollToSelectedDir()));
 #endif
 
@@ -333,7 +332,7 @@ void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const 
 	if(selected.count())
 	{
 		int prevRow = -1;
-		foreach(QModelIndex idx, selected.indexes())
+		for(const QModelIndex idx: selected.indexes())
 		{
 			if(idx.row() != prevRow)
 			{
@@ -525,7 +524,7 @@ void AnalogExif::fileView_selectionChanged(const QItemSelection&, const QItemSel
 
 			// load preview in the background
 			ui.filePreview->setPixmap(QPixmap());
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
             // Background loading doesn't work properly for Mac
             QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
             loadPreview(curFileName);
@@ -637,7 +636,7 @@ void AnalogExif::openLocation(QString path)
 
 		// load preview in the background
 		ui.filePreview->setPixmap(QPixmap());
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
 		// Background loading doesn't work properly for Mac
 		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 		loadPreview(curFileName);
@@ -698,7 +697,7 @@ void AnalogExif::loadPreview(QString filename)
 
 	filePreviewPixmap = filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
         // preview is loaded on the same thread under Mac
         previewUpdate();
 #else
@@ -887,7 +886,7 @@ bool AnalogExif::save()
 	if(fileNames.count() == 1)
 		singleFile = true;
 
-	foreach(QString fName, fileNames)
+	for(const QString& fName: fileNames)
 	{
 		progress.setValue(filesProcessed);
 		progress.setLabelText(tr("Saving %1...").arg(fName));
@@ -1319,7 +1318,7 @@ void AnalogExif::on_action_Clear_tag_value_triggered(bool)
 		return;
 
 	// clear their values
-	foreach(QModelIndex idx, idxList)
+	for(const QModelIndex& idx: idxList)
 	{
 		if(exifTreeModel->index(idx.row(), 1, idx.parent()).data(Qt::DisplayRole) != QVariant())
 		{
@@ -1335,7 +1334,7 @@ void AnalogExif::metadataView_selectionChanged(const QItemSelection& selected, c
 	if(selected.count() != 0)
 	{
 		// check for the data to clear
-		foreach(QModelIndex idx, selected.indexes())
+		for(const QModelIndex& idx: selected.indexes())
 		{
 			if(exifTreeModel->index(idx.row(), 1, idx.parent()).data(Qt::DisplayRole) != QVariant())
 			{
@@ -1501,6 +1500,14 @@ QString AnalogExif::createLibrary(QWidget* parent, QString dir)
 		// save previous database, in case of failure
 		QString previousName = db.databaseName();
 
+		//check if template resource exists
+		const QString templatePath = ":/database/db/NewDb.ael";
+		if(!QFile::exists(templatePath))
+		{
+			QMessageBox::critical(this, tr("Library create error"), tr("Template library resource not found. \nApplication may be corrupted."));
+			return QString();
+		}
+
 		// remove old file
 		if(QFile::exists(newDb))
 		{
@@ -1512,9 +1519,11 @@ QString AnalogExif::createLibrary(QWidget* parent, QString dir)
 		}
 
 		// copy from the resource file
-		if(!QFile::copy(":/database/NewDb.ael", newDb))
+		if(!QFile::copy(templatePath, newDb))
 		{
-			QMessageBox::critical(this, tr("Library create error"), tr("Unable to create new library ")+QDir::toNativeSeparators(newDb));
+			QMessageBox::critical(this, tr("Library create error"), 
+			tr("Unable to create new library cause:\n- Insufficient disk s[ace\n-No write permission to then folder")
+			.arg(QDir::toNativeSeparators(newDb)));
 			return QString();
 		}
 
@@ -1523,6 +1532,7 @@ QString AnalogExif::createLibrary(QWidget* parent, QString dir)
 		// use file attributes under Win32
 		if(!SetFileAttributes((LPCTSTR)newDb.toStdWString().c_str(), FILE_ATTRIBUTE_NORMAL))
 		{
+			QFile::remove(newDb);
 			QMessageBox::critical(this, tr("Library create error"), tr("Unable to create new library ")+QDir::toNativeSeparators(newDb));
 			return QString();
 		}
@@ -1532,6 +1542,7 @@ QString AnalogExif::createLibrary(QWidget* parent, QString dir)
 
 		if(!QFile::setPermissions(newDb, filePermissions | QFile::WriteOwner))
 		{
+			QFile::remove(newDb);
 			QMessageBox::critical(this, tr("Library create error"), tr("Unable to create new library ")+QDir::toNativeSeparators(newDb));
 			return QString();
 		}
@@ -1557,7 +1568,7 @@ void AnalogExif::addFileNames(QStringList& fileNames, const QString& path, bool 
 	}
 
 	QStringList subDirs = QDir(path).entryList(QStringList() << "*.jpg" << "*.jpeg" << "*.tif" << "*.tiff", QDir::Files | QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name | QDir::DirsLast | QDir::LocaleAware);
-	foreach(QString dirName, subDirs)
+	for(const QString& dirName: subDirs)
 	{
 		addFileNames(fileNames, path + "/" + dirName, includeDirs);
 	}
@@ -1577,7 +1588,7 @@ QStringList AnalogExif::scanSubfolders(QModelIndexList selIdx, bool includeDirs)
 	{
 		DirSortFilterProxyModel* sortModel = (DirSortFilterProxyModel*)selIdx.at(0).model();
 		// browse through all selected indexes
-		foreach(QModelIndex idx, selIdx)
+		for(const QModelIndex& idx: selIdx)
 		{
 			addFileNames(fileNames, ((QFileSystemModel*)sortModel->sourceModel())->filePath(sortModel->mapToSource(idx)), includeDirs);
 		}
@@ -1752,7 +1763,7 @@ void AnalogExif::on_actionOpen_external_triggered(bool)
 	std::sort(selIdx.begin(), selIdx.end(), [](const QModelIndex& a, const QModelIndex& b) {
 		return a.row() < b.row();
 		});
-	foreach(QModelIndex idx, selIdx)
+	for(const QModelIndex& idx: selIdx)
 	{
 		openExternal(idx);
 	}
@@ -1816,7 +1827,7 @@ void AnalogExif::on_actionRemove_triggered(bool)
 		warning.setText(tr("Are you sure you want to delete these files?"));
 	
 		QString affectedList = tr("The following files will be deleted:\n\n");
-		foreach(QString str, fileNames)
+		for(const QString& str: fileNames)
 		{
 			affectedList += str + "\n";
 		}
@@ -1842,7 +1853,7 @@ void AnalogExif::on_actionRemove_triggered(bool)
 	int filesDeleted = 0;
 	progress.setValue(0);
 
-	foreach(QString str, fileNames)
+	for(const QString& str: fileNames)
 	{
 		progress.setLabelText(tr("Deleting %1...").arg(str));
 
@@ -1937,7 +1948,7 @@ void AnalogExif::on_action_Copy_metadata_triggered(bool)
 		exifTreeModel->blockSignals(true);
 
 		// browse through all files
-		foreach(QString fName, fileNames)
+		for(const QString& fName: fileNames)
 		{
 			progress.setLabelText(tr("Updating %1...").arg(fName));
 

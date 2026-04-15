@@ -53,13 +53,13 @@ TagNameEditDialog::TagNameEditDialog(QWidget *parent, const QString& tagNames, E
 
 			ui.optionsBox->layout()->addWidget(altTagNames);
 
-			connect(cbx, SIGNAL(stateChanged(int)), this, SLOT(altTag_stateChanged(int)));
+			connect(cbx, &QCheckBox::stateChanged, this, &TagNameEditDialog::altTag_stateChanged);
 		}
 
 		if(i == ExifItem::Ascii)
 		{
 			asciiTagCbox = cbx;
-			connect(cbx, SIGNAL(stateChanged(int)), this, SLOT(ascii_stateChanged(int)));
+			connect(cbx, &QCheckBox::stateChanged, this, &TagNameEditDialog::ascii_stateChanged);
 		}
 	}
 
@@ -105,7 +105,7 @@ void TagNameEditDialog::on_buttonBox_accepted()
 
 	// browse through tags and verify them
 	QStringList tags = ui.tagNamesEdit->text().remove(QRegularExpression("(\\s?)")).split(",", Qt::SkipEmptyParts);
-	foreach(QString tag, tags)
+	for(const QString& tag: tags)
 	{
 		if(!ExifTreeModel::tagSupported(tag))
 		{
@@ -121,7 +121,7 @@ void TagNameEditDialog::on_buttonBox_accepted()
 	if(altTagNames && altTagNames->isEnabled())
 	{
 		tags = altTagNames->text().remove(QRegularExpression("(\\s?)")).split(",", Qt::SkipEmptyParts);
-		foreach(QString tag, tags)
+		for(const QString& tag: tags)
 		{
 			if(!ExifTreeModel::tagSupported(tag))
 			{

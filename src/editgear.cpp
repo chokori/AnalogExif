@@ -38,39 +38,39 @@ EditGear::EditGear(QWidget *parent)
 	gearList = new EditGearTreeModel(this, 0, true, tr("No equipment defined"));
 	gearList->reload();
 	ui.gearView->setModel(gearList);
-	connect(gearList, SIGNAL(layoutChanged()), this, SLOT(gearList_layoutChanged()));
-	connect(gearList, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(gearList_dataChanged(const QModelIndex &, const QModelIndex &)));
-	connect(ui.gearView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(gearView_clicked(const QModelIndex &)));
-	connect(ui.gearView, SIGNAL(focused()), this, SLOT(gear_focused()));
-	connect(ui.gearView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(gear_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(gearList, &EditGearTreeModel::layoutChanged, this, &EditGear::gearList_layoutChanged);
+	connect(gearList, &EditGearTreeModel::dataChanged, this, &EditGear::gearList_dataChanged);
+	connect(ui.gearView, &GearTreeView::clicked, this, &EditGear::gearView_clicked);
+	connect(ui.gearView, &GearTreeView::focused, this, &EditGear::gear_focused);
+	connect(ui.gearView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EditGear::gear_selectionChanged);
 	ui.gearView->expandAll();
 
 	filmList = new EditGearTreeModel(this, 2, false, tr("No films defined"));
 	filmList->reload();
 	ui.filmView->setModel(filmList);
-	connect(filmList, SIGNAL(layoutChanged()), this, SLOT(gearList_layoutChanged()));
-	connect(filmList, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(gearList_dataChanged(const QModelIndex &, const QModelIndex &)));
-	connect(ui.filmView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(gearView_clicked(const QModelIndex &)));
-	connect(ui.filmView, SIGNAL(focused()), this, SLOT(film_focused()));
-	connect(ui.filmView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(film_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(filmList, &EditGearTreeModel::layoutChanged, this, &EditGear::gearList_layoutChanged);
+	connect(filmList, &EditGearTreeModel::dataChanged, this, &EditGear::gearList_dataChanged);
+	connect(ui.filmView, &GearListView::clicked, this, &EditGear::gearView_clicked);
+	connect(ui.filmView, &GearListView::focused, this, &EditGear::film_focused);
+	connect(ui.filmView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EditGear::film_selectionChanged);
 
 	developerList = new EditGearTreeModel(this, 3, false, tr("No developers defined"));
 	developerList->reload();
 	ui.developerView->setModel(developerList);
-	connect(developerList, SIGNAL(layoutChanged()), this, SLOT(gearList_layoutChanged()));
-	connect(developerList, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(gearList_dataChanged(const QModelIndex &, const QModelIndex &)));
-	connect(ui.developerView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(gearView_clicked(const QModelIndex &)));
-	connect(ui.developerView, SIGNAL(focused()), this, SLOT(developer_focused()));
-	connect(ui.developerView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(developer_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(developerList, &EditGearTreeModel::layoutChanged, this, &EditGear::gearList_layoutChanged);
+	connect(developerList, &EditGearTreeModel::dataChanged, this, &EditGear::gearList_dataChanged);
+	connect(ui.developerView, &GearListView::clicked, this, &EditGear::gearView_clicked);
+	connect(ui.developerView, &GearListView::focused, this, &EditGear::developer_focused);
+	connect(ui.developerView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EditGear::developer_selectionChanged);
 
 	authorList = new EditGearTreeModel(this, 4, false, tr("No authors defined"));
 	authorList->reload();
 	ui.authorView->setModel(authorList);
-	connect(authorList, SIGNAL(layoutChanged()), this, SLOT(gearList_layoutChanged()));
-	connect(authorList, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(gearList_dataChanged(const QModelIndex &, const QModelIndex &)));
-	connect(ui.authorView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(gearView_clicked(const QModelIndex &)));
-	connect(ui.authorView, SIGNAL(focused()), this, SLOT(author_focused()));
-	connect(ui.authorView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(author_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(authorList, &EditGearTreeModel::layoutChanged, this, &EditGear::gearList_layoutChanged);
+	connect(authorList, &EditGearTreeModel::dataChanged, this, &EditGear::gearList_dataChanged);
+	connect(ui.authorView, &GearListView::clicked, this, &EditGear::gearView_clicked);
+	connect(ui.authorView, &GearListView::focused, this, &EditGear::author_focused);
+	connect(ui.authorView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EditGear::author_selectionChanged);
 	
 	QAction* separator = new QAction(this);
 	separator->setSeparator(true);
@@ -82,9 +82,9 @@ EditGear::EditGear(QWidget *parent)
 
 	metadataList = new EditGearTagsModel(this);
 	ui.metadataView->setModel(metadataList);
-	connect(metadataList, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(metadataList_dataChanged(const QModelIndex&, const QModelIndex&)));
-	connect(metadataList, SIGNAL(cleared()), this, SLOT(metadataList_cleared()));
-	connect(ui.metadataView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(metadata_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(metadataList, &EditGearTagsModel::dataChanged, this, &EditGear::metadataList_dataChanged);
+	connect(metadataList, &EditGearTagsModel::cleared, this, &EditGear::metadataList_cleared);
+	connect(ui.metadataView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EditGear::metadata_selectionChanged);
 
 	exifItemDelegate = new ExifItemDelegate(this);
 	ui.metadataView->setItemDelegateForColumn(1, exifItemDelegate);
@@ -429,7 +429,7 @@ void EditGear::on_actionDuplicate_triggered(bool)
 
 	int newId = -1;
 
-    foreach(QModelIndex index, selectedItems)
+    for(const QModelIndex &index: selectedItems)
 	{
 		switch(gearType)
 		{
@@ -533,7 +533,7 @@ void EditGear::on_actionDelete_triggered(bool)
 	if(result == QMessageBox::Yes)
 	{
 		bool deleted;
-	    foreach(QModelIndex index, selectedItems) {
+	    for(const QModelIndex &index: selectedItems) {
 			if(!treemodel->deleteGear(index.data(EditGearTreeModel::GetGearIdRole).toInt(), index.data(EditGearTreeModel::GetGearTypeRole).toInt()))
 			{
 				// error
@@ -887,7 +887,7 @@ void EditGear::on_actionDelete_meta_tag_triggered(bool)
 	QList<int> idList;
 
 	// collect all ids
-	foreach(QModelIndex idx, idxList)
+	for(const QModelIndex& idx: idxList)
 	{
 		// get tag id
 		QVariant tagId = idx.data(EditGearTagsModel::GetTagIdRole);
@@ -898,7 +898,7 @@ void EditGear::on_actionDelete_meta_tag_triggered(bool)
 	}
 
 	// delete accordingly
-	foreach(int i, idList)
+	for(int i: idList)
 	{
 		// delete and set dirty on success
 		if(!metadataList->deleteTag(i))

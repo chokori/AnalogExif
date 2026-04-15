@@ -30,7 +30,7 @@
 #include <QMessageBox>
 #include <QNetworkReply>
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
 #include "ui_analogexif_mac.h"
 #else
 #include "ui_analogexif.h"

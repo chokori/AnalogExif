@@ -27,7 +27,7 @@
 
 #include "exiftreemodel.h"
 
-#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
+#if defined(Q_OS_WIN)
 
 // use Windows CryptoAPI
 #pragma comment(lib, "crypt32.lib")
@@ -52,9 +52,9 @@ AnalogExifOptions::AnalogExifOptions(QWidget *parent)
 
 	gearTempList = new OptGearTemplateModel(this);
 	ui.gearTemplateView->setModel(gearTempList);
-	connect(gearTempList, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(gearTempList_dataChanged(const QModelIndex&, const QModelIndex&)));
+	connect(gearTempList, &OptGearTemplateModel::dataChanged, this, &AnalogExifOptions::gearTempList_dataChanged);
 
-	connect(ui.gearTemplateView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(gearList_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.gearTemplateView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnalogExifOptions::gearList_selectionChanged);
 
 	gearTempList->reload(0);
 	ui.gearTemplateView->setColumnWidth(0, 25);
@@ -69,7 +69,7 @@ AnalogExifOptions::AnalogExifOptions(QWidget *parent)
 	tagNameEditor = new TagNameItemDelegate(this);
 	ui.gearTemplateView->setItemDelegateForColumn(1, tagNameEditor);
 
-	connect(tagNameEditor, SIGNAL(closeEditor(QWidget*, QAbstractItemDelegate::EndEditHint)), ui.gearTemplateView, SLOT(onCloseEditor(QWidget*, QAbstractItemDelegate::EndEditHint)));
+	connect(tagNameEditor, &TagNameItemDelegate::closeEditor, ui.gearTemplateView, &OptGearTemplateView::onCloseEditor);
 
 	tagFormatEditor = new TagSelectValsItemDelegate(this);
 	ui.gearTemplateView->setItemDelegateForColumn(4, tagFormatEditor);
@@ -87,8 +87,9 @@ AnalogExifOptions::AnalogExifOptions(QWidget *parent)
 	setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 
 	verChecker = new OnlineVersionChecker(this);
-	connect(verChecker, SIGNAL(newVersionAvailable(QString, QString, QDateTime, QString)), this, SLOT(newVersionAvailable(QString, QString, QDateTime, QString)));
-	connect(verChecker, SIGNAL(newVersionCheckError(QNetworkReply::NetworkError)), this, SLOT(newVersionCheckError(QNetworkReply::NetworkError)));
+	
+	connect(verChecker, &OnlineVersionChecker::newVersionAvailable, this, &AnalogExifOptions::newVersionAvailable);
+	connect(verChecker, &OnlineVersionChecker::newVersionCheckError, this, &AnalogExifOptions::newVersionCheckError);
 
 	ui.proxyAddress->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9$-_@\\.&+!*\"'(),=;/#?: %\\\\]*"), this));
 
@@ -241,7 +242,7 @@ void AnalogExifOptions::removeTag(QModelIndex idx)
 			warning.setInformativeText(tr("Are you sure you want to delete this tag?"));
 			
 			QString affectedList = tr("The following equipment uses this tag:\n\n");
-			foreach(QString str, affectedGear)
+			for(const QString& str: affectedGear)
 			{
 				affectedList += "\t" + str + "\n";
 			}
@@ -264,7 +265,7 @@ void AnalogExifOptions::on_actionDelete_triggered(bool)
 	// check all selections 
 	QModelIndexList idxs = ui.gearTemplateView->selectionModel()->selectedRows();
 
-	foreach(QModelIndex idx, idxs)
+	for(const QModelIndex& idx: idxs)
 	{
 		removeTag(idx);
 	}
@@ -342,7 +343,7 @@ void AnalogExifOptions::loadOptions()
 
 	QString userPassword;
 
-#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
+#if defined(Q_OS_WIN)
 	QByteArray userPwd = settings.value("ProxyPassword", QByteArray()).toByteArray();
 
 	// decode password using CryptoAPI under Windows
@@ -366,7 +367,7 @@ void AnalogExifOptions::loadOptions()
 	}
 #else
 	userPassword = settings.value("ProxyPassword", QString()).toString();
-#endif	// Q_WS_WIN32
+#endif	// Q_OS_WIN32
 
 	ui.proxyPassword->setText(userPassword);
 
@@ -484,7 +485,7 @@ bool AnalogExifOptions::saveOptions()
 		settings.setValue("ProxyPort", ui.proxyPort->value());
 		settings.setValue("ProxyUsername", ui.proxyUsername->text());
 
-#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
+#if defined(Q_OS_WIN)
 		QByteArray userPassword;
 		userPassword.append(ui.proxyPassword->text().toUtf8());
 
@@ -509,7 +510,7 @@ bool AnalogExifOptions::saveOptions()
 		}
 #else
 		settings.setValue("ProxyPassword", ui.proxyPassword->text());
-#endif	// Q_WS_WIN32
+#endif	// Q_OS_WIN
 	}
 	else
 	{
@@ -746,7 +747,7 @@ void AnalogExifOptions::setupProxy()
 		QString userName = settings.value("ProxyUsername", QString()).toString();
 		QString userPassword;
 
-#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
+#if defined(Q_OS_WIN)
 		QByteArray userPwd = settings.value("ProxyPassword", QByteArray()).toByteArray();
 
 		// decode password using CryptoAPI under Windows
@@ -770,7 +771,7 @@ void AnalogExifOptions::setupProxy()
 		}
 #else
 		userPassword = settings.value("ProxyPassword", QString()).toString();
-#endif	// Q_WS_WIN32
+#endif	// Q_OS_WIN
 
 		// set application-wide proxy
 		QNetworkProxy::setApplicationProxy(QNetworkProxy(proxyType, hostName, proxyPort, userName, userPassword));

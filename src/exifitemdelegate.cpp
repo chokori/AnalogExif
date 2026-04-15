@@ -56,7 +56,7 @@ QWidget* ExifItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 		if(values != QList<QVariantList>())
 		{
 			// set the combo box items
-			foreach(QVariantList valuePair, values)
+			for(const QVariantList& valuePair: values)
 			{
 				combo->addItem(valuePair.at(0).toString(), valuePair.at(1));
 			}
@@ -279,7 +279,7 @@ void ExifItemDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 			QVariant curValue = index.data(Qt::EditRole);
 
 			// set the combo box items
-			foreach(QVariantList valuePair, values)
+			for(const QVariantList& valuePair: values)
 			{
 				if(curValue == valuePair.at(1))
 					break;
@@ -388,6 +388,8 @@ void ExifItemDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 			if(rational.count() == 2)
 			{
 				int first = rational.at(0).toInt(), second = rational.at(1).toInt();
+				if (second == 0)
+					return;
 				double shutter = (double)first/(double)second;
 				QString text;
 				if(shutter < 0.5)

@@ -29,7 +29,7 @@ const QUrl OnlineVersionChecker::downloadUrl("http://sourceforge.net/projects/an
 
 OnlineVersionChecker::OnlineVersionChecker(QObject *parent) : QObject(parent), curRequest(NULL)
 {
-	connect(&manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
+	connect(&manager, &QNetworkAccessManager::finished, this, &OnlineVersionChecker::downloadFinished);
 }
 
 bool OnlineVersionChecker::needToCheckVersion()

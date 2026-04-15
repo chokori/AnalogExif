@@ -37,7 +37,7 @@ MultiTagValuesDialog::MultiTagValuesDialog(ExifItem::TagType type, const QString
 	ui.valuesView->setItemDelegateForColumn(0, itemDelegate);
 
 	// check the changes in the selection
-	connect(ui.valuesView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(list_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.valuesView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MultiTagValuesDialog::list_selectionChanged);
 
 	// setup context menu
 	QAction* separator = new QAction(this);
@@ -184,7 +184,7 @@ void MultiTagValuesItemModel::setValues(const QVariantList& data)
 {
 	clear();
 
-	foreach(QVariant value, data)
+	for(const QVariant& value: data)
 	{
 		// add new row
 		QStandardItem* newItem = new QStandardItem(ExifTreeModel::getItemData(value, tagFormat, tagFlags, (ExifItem::TagType)dataType).toString());

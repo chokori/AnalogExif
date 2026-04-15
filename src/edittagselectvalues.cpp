@@ -35,7 +35,7 @@ EditTagSelectValues::EditTagSelectValues(ExifItem::TagType dataType, ExifItem::T
 	exifItemDelegate = new ExifItemDelegate(ui.selValsView);
 	ui.selValsView->setItemDelegateForColumn(1, exifItemDelegate);
 
-	connect(ui.selValsView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(list_selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(ui.selValsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EditTagSelectValues::list_selectionChanged);
 
 	QAction* separator = new QAction(this);
 	separator->setSeparator(true);
@@ -65,7 +65,7 @@ void TagSelectValsItemModel::setValues(const QString& data)
 	if(values == QList<QVariantList>())
 		return;
 
-	foreach(QVariantList valuePair, values)
+	for(const QVariantList& valuePair: values)
 	{
 		QList<QStandardItem*> itemList;
 

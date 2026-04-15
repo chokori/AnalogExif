@@ -154,7 +154,7 @@ bool ExifTreeModel::openFile(QString filename)
 	}
 	catch(Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::openFile(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
+		qDebug() << "AnalogExif: ExifTreeModel::openFile" << filename << "Exiv2 exception :" << err.what();
 		return false;
 	}
 		
@@ -314,6 +314,8 @@ QVariant ExifTreeModel::getItemValue(const QVariant& itemValue, const QString& i
 	case ExifItem::TagShutter:
 		{
 			QVariantList rational = itemValue.toList();
+			if(rational.count() < 2 || rational.at(1).toInt() == 0)
+				return QVariant();
 			double value = (double)rational.at(0).toInt() / (double)rational.at(1).toInt();
 
 			if(role == Qt::DisplayRole)
@@ -395,7 +397,7 @@ QVariant ExifTreeModel::getItemData(const QVariant& itemValue, const QString& it
 		{
 			// for edit - process the whole list before giving up to editor (required for e.g. APEX adjustments)
 			QVariantList processedList;
-			foreach(QVariant value, itemValue.toList())
+			for(const QVariant& value: itemValue.toList())
 			{
 				processedList << getItemValue(value, itemFormat, itemFlags, itemType, role);
 			}
@@ -405,7 +407,7 @@ QVariant ExifTreeModel::getItemData(const QVariant& itemValue, const QString& it
 		else if(role == Qt::DisplayRole)
 		{
 			QString result;
-			foreach(QVariant value, itemValue.toList())
+			for(const QVariant& value: itemValue.toList())
 			{
 				result += getItemValue(value, itemFormat, itemFlags, itemType, role).toString() + "; ";
 			}
@@ -535,7 +537,7 @@ bool ExifTreeModel::setData(const QModelIndex &index, const QVariant &value, int
 			QVariantList valueList;
 
 			// process each value in the list
-			foreach(QVariant listValue, value.toList())
+			for(const QVariant& listValue: value.toList())
 			{
 				valueList << processItemData(item, listValue, ok);
 			}
@@ -635,6 +637,8 @@ QString ExifTreeModel::getGPSfromXmp()
 		}
 		else if(latStrs.count() == 2)
 		{
+			if(latStrs.at(1).isEmpty())
+				return "";
 			if(latStrs.at(1).at(latStrs.at(1).length() - 1) == 'N')
 				gpsPosition = "+";
 			else
@@ -666,6 +670,8 @@ QString ExifTreeModel::getGPSfromXmp()
 			}
 			else if(longStrs.count() == 2)
 			{
+				if(longStrs.at(1).isEmpty())
+					return "";
 				if(longStrs.at(1).at(longStrs.at(1).length() - 1) == 'E')
 					gpsPosition += "+";
 				else
@@ -844,7 +850,7 @@ QVariant ExifTreeModel::readTagValue(QString tagNames, int& srcTagType, ExifItem
 	// get list of tags
 	QStringList tags = tagNames.remove(QChar(' ')).split(",", Qt::SkipEmptyParts);
 
-	foreach(QString tagName, tags)
+	for(const QString& tagName: tags)
 	{
 		QString tagType = tagName.split(".").at(0);
 		if(tagType == "Exif")
@@ -1136,7 +1142,7 @@ bool ExifTreeModel::readMetaValues(Exiv2::Image::UniquePtr& exivHandle)
 			}
 			catch(Exiv2::Error& err)
 			{
-				qDebug("AnalogExif: ExifTreeModel::readMetaValues() Exiv2 exception (%d) = %s", err.code(), err.what());
+				qDebug()<< "AnalogExif: ExifTreeModel::readMetaValues() Exiv2 exception :" << err.what();
 				return false;
 			}
 		}
@@ -1273,7 +1279,7 @@ bool ExifTreeModel::storeGPSInExif(QString gpsStr, Exiv2::ExifData& exifData)
 	}
 	catch(Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::storeGPSInExif() Exiv2 exception (%d) = %s", err.code(), err.what());
+		qDebug()<< "AnalogExif: ExifTreeModel::storeGPSInExif() Exiv2 exception :" << err.what();
 		return false;
 	}
 
@@ -1307,9 +1313,10 @@ bool ExifTreeModel::storeGPSInXmp(QString gpsStr, Exiv2::XmpData& xmpData)
 	}
 	catch(Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::storeGPSInXmp() Exiv2 exception (%d) = %s", err.code(), err.what());
+		qDebug() << "AnalogExif: ExifTreeModel::storeGPSInXmp() Exiv2 exception :" << err.what();
 		return false;
 	}
+
 
 	return true;
 }
@@ -1340,9 +1347,13 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 {
 	QStringList tags = tagNames.remove(QChar(' ')).split(",", Qt::SkipEmptyParts);
 
-	foreach(QString tagName, tags)
+	for(const QString& tagName: tags)
 	{
-		QString tagType = tagName.split(".").at(0);
+		QStringList tagParts = tagName.split(".");
+		if(tagParts.isEmpty())
+			continue;
+		
+		QString tagType = tagParts.at(0);
 		if(tagType == "Exif")
 		{
 			// Exif data
@@ -1362,7 +1373,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 					QVariantList valueList = tagValue.toList();
 
 					// add each value to the tag
-					foreach(QVariant value, valueList)
+					for(const QVariant& value: valueList)
 					{
 						tagValueToMetadata(value, type, *v);
 					}
@@ -1422,7 +1433,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 					QVariantList valueList = tagValue.toList();
 
 					// store each value as separate tag
-					foreach(QVariant value, valueList)
+					for(const QVariant& value: valueList)
 					{
 						Exiv2::Value::UniquePtr v = Exiv2::Value::create(typId);
 						tagValueToMetadata(value, type, *v);
@@ -1473,7 +1484,7 @@ void ExifTreeModel::writeTagValue(QString tagNames, const QVariant& tagValue, Ex
 					{
 						v = Exiv2::Value::create(typId);
 
-						foreach(QVariant val, tagValue.toList())
+						for(const QVariant& val: tagValue.toList())
 						{
 							QStringToExifUtf(*v, ExifItem::valueToString(val, type, QVariant(), false), false, true, typId);
 						}
@@ -1573,7 +1584,7 @@ bool ExifTreeModel::prepareMetadata(Exiv2::ExifData& exifData, Exiv2::IptcData& 
 				}
 				catch(Exiv2::Error& err)
 				{
-					qDebug("AnalogExif: ExifTreeModel::prepareMetadata() Exiv2 exception (%d) = %s", err.code(), err.what());
+					qDebug()<< "AnalogExif: ExifTreeModel::prepareMetadata() Exiv2 exception :" << err.what();
 					return false;
 				}
 			}
@@ -1741,7 +1752,7 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 	{
 		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
 
-	    if((image.get() == 0) || (!image->good()))
+	    if((image.get() == nullptr) || (!image->good()))
 			return false;
 
 		// replace image metadata
@@ -1781,12 +1792,10 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 			Exiv2::IptcData::const_iterator iptcEnd = curIptcData.end();
 			for(Exiv2::IptcData::const_iterator i = curIptcData.begin(); i != iptcEnd; ++i)
 			{
-				for (Exiv2::IptcData::iterator it = imgIptcData.begin(); it != imgIptcData.end();)
-				{
-					if (it->key() == i->key())
-						it = imgIptcData.erase(it);
-					else
-						++it;
+				while (true) {
+					auto it = imgIptcData.findKey(Exiv2::IptcKey(i->key()));
+					if (it == imgIptcData.end()) break;
+					imgIptcData.erase(it);
 				}
 				imgIptcData.add(*i);
 			}
@@ -1812,7 +1821,7 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 	}
 	catch(Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::saveFile(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
+		qDebug()<< "AnalogExif: ExifTreeModel::saveFile() Exiv2 exception :" << err.what();
 		return false;
 	}
 
@@ -1963,9 +1972,12 @@ void ExifTreeModel::eraseTag(QString tagNames, Exiv2::ExifData& exifData, Exiv2:
 {
 	QStringList tags = tagNames.remove(QChar(' ')).split(",", Qt::SkipEmptyParts);
 
-	foreach(QString tagName, tags)
+	for(const QString& tagName: tags)
 	{
-		QString tagType = tagName.split(".").at(0);
+		QStringList tagParts = tagName.split(".");
+		if(tagParts.isEmpty())
+			continue;
+		QString tagType = tagParts.at(0);
 		if(tagType == "Exif")
 		{
 			// Exif data
@@ -2037,7 +2049,7 @@ bool ExifTreeModel::prepareEtagsAndErase(Exiv2::ExifData& exifData, Exiv2::IptcD
 			}
 			catch (Exiv2::Error& err)
 			{
-				qDebug("AnalogExif: ExifTreeModel::prepareEtags() Exiv2 exception (%d) = %s", err.code(), err.what());
+				qDebug()<< "AnalogExif: ExifTreeModel::prepareEtags() Exiv2 exception :" << err.what();
 				return false;
 			}
 		}
@@ -2085,7 +2097,7 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 	}
 	catch (Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::setExposureNumber(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
+		qDebug("AnalogExif: ExifTreeModel::setExposureNumber() Exiv2 exception (%d) = %s", err.code(), err.what());
 		return false;
 	}
 
@@ -2112,7 +2124,7 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 				return false;
 		}
 
-		foreach(QVariant value, metadata)
+		for(const QVariant& value: metadata)
 		{
 			ExifItem* item = static_cast<ExifItem*>(value.value<void*>());
 
@@ -2153,7 +2165,7 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 	}
 	catch (Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::setExposureNumber(%s) Exiv2 exception (%d) = %s", filename.toStdString().c_str(), err.code(), err.what());
+		qDebug("AnalogExif: ExifTreeModel::mergeMetadata() Exiv2 exception (%d) = %s", err.code(), err.what());
 		return false;
 	}
 

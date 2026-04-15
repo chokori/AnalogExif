@@ -22,7 +22,7 @@
 
 #include <QDialog>
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
 #include "ui_aboutdialog_mac.h"
 #else
 #include "ui_aboutdialog.h"

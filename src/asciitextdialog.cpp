@@ -33,7 +33,7 @@ AsciiTextDialog::AsciiTextDialog(const QString& uValue, const QString& aValue, Q
 	if(aValue.isEmpty())
 	{
 		// for some reason Local8Bit on Mac still Unicode
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
 		ui.asciiEdit->setPlainText(QString::fromLatin1(uValue.toLatin1().constData()));
 #else
 		ui.asciiEdit->setPlainText(QString::fromLocal8Bit(uValue.toLocal8Bit().constData()));
@@ -50,7 +50,7 @@ AsciiTextDialog::AsciiTextDialog(const QString& uValue, const QString& aValue, Q
 void AsciiTextDialog::on_copyBtn_clicked()
 {
 	// for some reason Local8Bit on Mac still Unicode
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
 	ui.asciiEdit->setPlainText(QString::fromLatin1(ui.unicodeEdit->toPlainText().toLatin1().constData()));
 #else
 	ui.asciiEdit->setPlainText(QString::fromLocal8Bit(ui.unicodeEdit->toPlainText().toLocal8Bit().constData()));

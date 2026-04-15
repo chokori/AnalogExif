@@ -25,7 +25,7 @@ CopyMetadataDialog::CopyMetadataDialog(const QString& fname, QWidget *parent)
 	ui.setupUi(this);
 
 	exifTreeModel = new CheckedExifTreeModel(this);
-	connect(exifTreeModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(exifTreeModel_dataChanged(const QModelIndex&, const QModelIndex&)));
+	connect(exifTreeModel, &CheckedExifTreeModel::dataChanged, this, &CopyMetadataDialog::exifTreeModel_dataChanged);
 
 	exifItemDelegate = new ExifItemDelegate(this);
 

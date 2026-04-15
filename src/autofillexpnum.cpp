@@ -34,7 +34,7 @@ AutoFillExpNum::AutoFillExpNum(QStringList& fileList, QWidget *parent)
 
 	int nExposures = 1;
 
-	foreach(QString fileName, fileList)
+	for(const QString fileName: fileList)
 	{
 		QList<QStandardItem*> row;
 
@@ -55,7 +55,7 @@ AutoFillExpNum::AutoFillExpNum(QStringList& fileList, QWidget *parent)
 	ui.fileExposures->setModel(files);
 	ui.fileExposures->setColumnWidth(0, 300);
 
-	connect(files, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(files_dataChanged(const QModelIndex&, const QModelIndex&)));
+	connect(files, &QStandardItemModel::dataChanged, this, &AutoFillExpNum::files_dataChanged);
 
 	setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 }
@@ -95,7 +95,7 @@ void AutoFillExpNum::on_firstExpNum_valueChanged(int i)
 
 	int numExp = i;
 
-	foreach(QStandardItem* item, children)
+	for(QStandardItem* item: children)
 	{
 		item->setData(numExp, Qt::EditRole);
 		numExp++;

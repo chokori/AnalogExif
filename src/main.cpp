@@ -20,7 +20,7 @@
 #include "analogexif.h"
 #include <QApplication>
 
-#if defined(Q_WS_WIN32) || defined(Q_OS_WIN)
+#if defined(Q_OS_WIN)
 #include <QtPlugin>
 
 //QTPLUGIN(qjpeg)
