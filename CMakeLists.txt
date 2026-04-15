@@ -154,34 +154,27 @@ if(WIN32)
     )
 
     install(TARGETS AnalogExif RUNTIME DESTINATION .)
-	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael" DESTINATION "db_temp")
     install(CODE "
-        file(GLOB _deploy_dlls \"${CMAKE_CURRENT_BINARY_DIR}/*.dll\")
-        foreach(_dll \${_deploy_dlls})
-            file(INSTALL \${_dll} DESTINATION \"\${CMAKE_INSTALL_PREFIX}\")
-        endforeach()
+        execute_process(COMMAND \"${WINDEPLOYQT_EXECUTABLE}\" 
+            --no-compiler-runtime 
+            --no-svg 
+            --no-translations 
+            --verbose 0 
+            \"\${CMAKE_INSTALL_PREFIX}/AnalogExif.exe\") 
     ")
-
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/platforms"
-            DESTINATION .
-            OPTIONAL)
-    install(DIRECTORY "${CMAKE_CURRENT_BINARDY_DIR}/styles"
-            DESTINATION .
-            OPTIONAL)
-    install(DIRECTORY "${CMAKE_CURRENT_BINARDY_DIR}/imageformats"
-            DESTINATION .
-            OPTIONAL)
+	
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael" DESTINATION "db")
 
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
         SetShellVarContext current
         IfFileExists '$DOCUMENTS/AnalogExif/AnalogExif.ael' db_exists 0 
             CreateDirectory '$DOCUMENTS/AnalogExif'
-            CopyFiles /SILENT '$INSTDIR/db_temp/AnalogExif.ael' '$DOCUMENTS/AnalogExif/AnalogExif.ael'
+            CopyFiles /SILENT '$INSTDIR/db/AnalogExif.ael' '$DOCUMENTS/AnalogExif/AnalogExif.ael'
             Goto copy_done
         db_exists:
             DetailPrint 'Database file already exists. Skipping copy.'
         copy_done:
-        RMDir /r '$INSTDIR/db_temp'
+        RMDir /r '$INSTDIR/db'
     ")
 	
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "

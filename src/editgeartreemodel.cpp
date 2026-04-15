@@ -116,7 +116,7 @@ QMimeData* EditGearTreeModel::mimeData(const QModelIndexList &indexes) const
 
 	QDataStream stream(&encodedData, QIODeviceBase::WriteOnly);
 
-	foreach (QModelIndex index, indexes) {
+	for(const QModelIndex& index: indexes) {
 		if (index.isValid()) {
 			int parentId = -1;
 			if(index.parent().isValid())
