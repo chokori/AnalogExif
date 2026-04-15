@@ -7,7 +7,7 @@
 	<Date>20260413</Date>
 	<Notes>
 New from 1.0.0 release:
-* QT6, Exiv 0.28.8
+* Qt 6.11, Exiv 0.28.8
 
 New from 0.0.4 release:
 * Due to incorrect release, Exiv2 0.20 was not properly

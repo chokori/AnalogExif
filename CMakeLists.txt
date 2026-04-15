@@ -153,36 +153,31 @@ if(WIN32)
                 \"$<TARGET_FILE:AnalogExif>\"
     )
 
-	configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael
-    ${CMAKE_CURRENT_BINARY_DIR}/AnalogExif.ael
-    COPYONLY
-	)
-
     install(TARGETS AnalogExif RUNTIME DESTINATION .)
-    
-	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael" 
-            DESTINATION "db_temp")
-			
-	install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/"
+	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael" DESTINATION "db_temp")
+    install(CODE "
+        file(GLOB _deploy_dlls \"${CMAKE_CURRENT_BINARY_DIR}/*.dll\")
+        foreach(_dll \${_deploy_dlls})
+            file(INSTALL \${_dll} DESTINATION \"\${CMAKE_INSTALL_PREFIX}\")
+        endforeach()
+    ")
+
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/platforms"
             DESTINATION .
-            FILES_MATCHING 
-            PATTERN "*.dll"           
-            PATTERN "platforms/*"     
-            PATTERN "styles/*"
-            PATTERN "imageformats/*"
-            PATTERN "Debug" EXCLUDE
-            PATTERN "*_autogen" EXCLUDE 
-            PATTERN "CMakeFiles" EXCLUDE
-            PATTERN "db_install" EXCLUDE
-            PATTERN "_CPack_Packages" EXCLUDE)
+            OPTIONAL)
+    install(DIRECTORY "${CMAKE_CURRENT_BINARDY_DIR}/styles"
+            DESTINATION .
+            OPTIONAL)
+    install(DIRECTORY "${CMAKE_CURRENT_BINARDY_DIR}/imageformats"
+            DESTINATION .
+            OPTIONAL)
 
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
         SetShellVarContext current
-        IfFileExists '$DOCUMENTS/AnalogExif/AnalogExif.ael' db_exists
+        IfFileExists '$DOCUMENTS/AnalogExif/AnalogExif.ael' db_exists 0 
             CreateDirectory '$DOCUMENTS/AnalogExif'
-            CopyFiles '$INSTDIR/db_temp/AnalogExif.ael' '$DOCUMENTS/AnalogExif/AnalogExif.ael'
-            goto copy_done
+            CopyFiles /SILENT '$INSTDIR/db_temp/AnalogExif.ael' '$DOCUMENTS/AnalogExif/AnalogExif.ael'
+            Goto copy_done
         db_exists:
             DetailPrint 'Database file already exists. Skipping copy.'
         copy_done:
@@ -191,10 +186,11 @@ if(WIN32)
 	
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
         SetShellVarContext current
-        MessageBox MB_YESNO|MB_ICONQUESTION 'Delete the database file in your Documents?' /SD IDNO IDNO NoDelete
-            Delete '$DOCUMENTS/AnalogExif/AnalogExif.ael'
-            RMDir '$DOCUMENTS/AnalogExif'
-        NoDelete:
+        Delete '$DESKTOP/AnalogExif.lnk'
+        MessageBox MB_YESNO|MB_ICONQUESTION 'Delete the database file in your Documents?' IDNO skip_delete
+        Delete '$DOCUMENTS/AnalogExif/AnalogExif.ael'
+        RMDir '$DOCUMENTS/AnalogExif'
+        skip_delete:
     ")
 
     set(CPACK_PACKAGE_NAME "AnalogExif")

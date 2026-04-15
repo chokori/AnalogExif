@@ -6,7 +6,7 @@ This repository is a **modernized and maintained fork** of the original
 AnalogExif is a tool for editing and managing EXIF metadata for **scanned film photographs**.  
 This fork updates the project to a modern toolchain using **Qt 6**, **CMake**, and **vcpkg (manifest mode)**,  
 
-https://github.com/chokori/analogexif
+**Repository:** [github.com/chokori/analogexif](https://github.com/chokori/analogexif)
 ---
 
 ## ✨ Features
@@ -14,22 +14,21 @@ https://github.com/chokori/analogexif
 - Edit EXIF metadata for scanned film images  
 - Modern Qt 6 user interface  
 - Fully reproducible builds using CMakePresets + vcpkg  
-- Exiv2 0.28.0, Expat 2.7.4, QT 6.11
+- Exiv2 0.28.8, Expat 2.7.4, QT 6.11
 - C++17
-- Visutal Studio 2022
 
 ---
 
 ## 📦 Dependencies
 
 *(Both Exiv2 and Expat are automatically managed through vcpkg — no manual installation required.)*
-- Exiv2 0.28.0 with features:
+- Exiv2 0.28.8 with features:
   - `bmff`
   - `png`
   - `xmp`
 - Expat 2.7.4
 
-- QT6.11
+- QT 6.11
 *Qt is **not** installed automatically. You must install Qt 6.11 manually and set the `QTDIR` environment variable.*
 
 
@@ -64,12 +63,12 @@ cmake --build build/release --config Release
 
 If you encounter a database error on first launch, select the default database located at:
 
-**/res/db/AnalogExif.ael**
-
+**Develop/Build**: `/res/db/AnalogExif.ael`
+**Installation**: `Documents/AnalogExif/AnalogExif.ael`
 
 ## 🚀 How to Build and Package (Windows)
 
-This project uses **CMake** and **CPack** to generate a Windows installer (.exe). To include all dependencies (Qt6, Exiv2, Expat), follow these steps:
+This project uses **CMake** and **CPack** to generate a Windows installer (.exe). To include all dependencies (Qt 6.11, Exiv2, Expat), follow these steps:
 
 ### Prerequisites
 1. **Visual Studio 2022** (with C++ Desktop Development workload)
