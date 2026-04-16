@@ -59,13 +59,6 @@ cmake --preset x64-release
 cmake --build build/release --config Release
 ```
 
-## Database Error
-
-If you encounter a database error on first launch, select the default database located at:
-
-**Develop/Build**: `/res/db/AnalogExif.ael`
-**Installation**: `Documents/AnalogExif/AnalogExif.ael`
-
 ## 🚀 How to Build and Package (Windows)
 
 This project uses **CMake** and **CPack** to generate a Windows installer (.exe). To include all dependencies (Qt 6.11, Exiv2, Expat), follow these steps:
