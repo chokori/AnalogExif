@@ -68,7 +68,7 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 	fileViewModel->setFilter(QDir::Files);
 	// show supported files only
 	fileViewModel->setNameFilterDisables(false);
-	fileViewModel->setNameFilters(QStringList() << "*.jpg" << "*.jpeg" << "*.jpe" << "*.tif" << "*.tiff" << "*.dng" << "*.jp2" << "*.jpf" << "*.jpx" << "*.j2k" << "*.j2c" << "*.jpc" << "*.psd");
+	fileViewModel->setNameFilters(QStringList() << "*.jpg" << "*.jpeg" << "*.jpe" << "*.tif" << "*.tiff" << "*.dng" << "*.jp2" << "*.jpf" << "*.jpx" << "*.j2k" << "*.j2c" << "*.jpc" << "*.psd" << "*.cr2" << "*.nef" << "*.pef" << "*.rw2" << "*.arw" << "*.sr2" << "*.orf" << "*.raf" << "*.mrw");
 	fileViewModel->setReadOnly(false);
 	fileSorter = new DirSortFilterProxyModel(this);
 	fileSorter->setSourceModel(fileViewModel);
