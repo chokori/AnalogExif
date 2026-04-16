@@ -75,6 +75,7 @@ This project uses **CMake** and **CPack** to generate a Windows installer (.exe)
 ```
 git clone [https://github.com/chokori/AnalogExif.git](https://github.com/chokori/AnalogExif.git)
 cd AnalogExif
+git submodule update --init --recursive
 ```
 2. Configure the project Replace [vcpkg root] with your actual vcpkg installation path.
 ```
