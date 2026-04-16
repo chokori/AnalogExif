@@ -1,6 +1,6 @@
 /*
 	Copyright (C) 2010 C-41 Bytes <contact@c41bytes.com>
-
+	Copyright (C) 2026 chokori <https://github.com/chokori/AnalogExif>
 	This file is part of AnalogExif.
 
     AnalogExif is free software: you can redistribute it and/or modify
@@ -18,11 +18,17 @@
 */
 
 #include "aboutdialog.h"
+#include "version.h"
 
 AboutDialog::AboutDialog(QWidget *parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
+
+    // Update version in about text
+    QString aboutText = ui.label_2->text();
+    aboutText.replace("version 1.0.0", QString("version %1").arg(APP_VERSION));
+    ui.label_2->setText(aboutText);
 
 	setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 }

@@ -1,8 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
 set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
-project(AnalogExif LANGUAGES CXX)
+project(AnalogExif VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+
+# Generate version header
+string(TIMESTAMP BUILD_DATE "%Y%m%d")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/version.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/version.h"
+)
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/res/version.xml.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/res/version.xml"
+)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -117,7 +129,10 @@ qt_add_executable(AnalogExif WIN32
     ${RESOURCES}
 )
 
-target_include_directories(AnalogExif PRIVATE include)
+target_include_directories(AnalogExif PRIVATE 
+    include
+    "${CMAKE_CURRENT_BINARY_DIR}/include"
+)
 
 target_link_libraries(AnalogExif PRIVATE
     Qt6::Widgets
@@ -188,7 +203,7 @@ if(WIN32)
 
     set(CPACK_PACKAGE_NAME "AnalogExif")
     set(CPACK_PACKAGE_VENDOR "chokori")
-    set(CPACK_PACKAGE_VERSION "1.0.0")
+    set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "AnalogExif")
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")

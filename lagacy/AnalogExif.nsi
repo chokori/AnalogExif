@@ -80,6 +80,7 @@ Section "MainSection" SEC01
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\AnalogExif.lnk" "$INSTDIR\AnalogExif.exe"
+  CreateShortCut "$DESKTOP\AnalogExif.lnk" "$INSTDIR\AnalogExif.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
@@ -123,6 +124,7 @@ Section Uninstall
 
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\AnalogExif.lnk"
+  Delete "$DESKTOP\AnalogExif.lnk"
 
   RMDir "$SMPROGRAMS\$ICONS_GROUP"
   RMDir "$INSTDIR"

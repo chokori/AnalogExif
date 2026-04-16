@@ -1,6 +1,6 @@
 ﻿/*
 	Copyright (C) 2010 C-41 Bytes <contact@c41bytes.com>
-
+	Copyright (C) 2026 chokori <https://github.com/chokori/AnalogExif>
 	This file is part of AnalogExif.
 
     AnalogExif is free software: you can redistribute it and/or modify
@@ -332,7 +332,7 @@ void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const 
 	if(selected.count())
 	{
 		int prevRow = -1;
-		for(const QModelIndex idx: selected.indexes())
+		for(const QModelIndex& idx: selected.indexes())
 		{
 			if(idx.row() != prevRow)
 			{
@@ -774,7 +774,7 @@ bool AnalogExif::createBackup(QString filename, bool singleFile, QMessageBox::St
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
 			QElapsedTimer timer;
-			ProgressDialog progress(tr("Creating backup"), "Please wait...", "", this, 0, 100);
+			ProgressDialog progress(tr("Creating backup"), tr("Please wait..."), "", this, 0, 100);
 			QFuture<bool> future = QtConcurrent::run(QFile::copy, filename, filename + ".bak");
 			progress.setValue(0);
 
@@ -1522,7 +1522,7 @@ QString AnalogExif::createLibrary(QWidget* parent, QString dir)
 		if(!QFile::copy(templatePath, newDb))
 		{
 			QMessageBox::critical(this, tr("Library create error"), 
-			tr("Unable to create new library cause:\n- Insufficient disk s[ace\n-No write permission to then folder")
+			tr("Unable to create new library cause:\n- Insufficient disk space\n-No write permission to then folder")
 			.arg(QDir::toNativeSeparators(newDb)));
 			return QString();
 		}

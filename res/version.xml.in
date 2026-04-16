@@ -2,9 +2,9 @@
 <Releases>
 <Release>
 	<OS>Win32</OS>
-	<Version>1.0.0</Version>
+	<Version>@PROJECT_VERSION@</Version>
 	<ReleaseNumber>1</ReleaseNumber>
-	<Date>20260413</Date>
+	<Date>@BUILD_DATE@</Date>
 	<Notes>
 New from 1.0.0 release:
 * Qt 6.11, Exiv 0.28.8

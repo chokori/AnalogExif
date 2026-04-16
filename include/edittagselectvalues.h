@@ -1,6 +1,6 @@
 /*
 	Copyright (C) 2010 C-41 Bytes <contact@c41bytes.com>
-
+		Copyright (C) 2026 chokori <https://github.com/chokori/AnalogExif>
 	This file is part of AnalogExif.
 
     AnalogExif is free software: you can redistribute it and/or modify
