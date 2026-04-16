@@ -174,9 +174,19 @@ if(WIN32)
             --no-compiler-runtime 
             --no-svg 
             --no-translations 
+            --no-opengl-sw
+            --no-opengl
+            --no-quick
+            --no-system-d3d-compiler
             --verbose 0 
             \"\${CMAKE_INSTALL_PREFIX}/AnalogExif.exe\") 
     ")
+    install(CODE "
+        file(REMOVE
+            \"\${CMAKE_INSTALL_PREFIX}/dxcompiler.dll\"
+            \"\${CMAKE_INSTALL_PREFIX}/dxil.dll\")
+    ")
+
 	
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/db/AnalogExif.ael" DESTINATION "db")
 
