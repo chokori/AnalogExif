@@ -1,6 +1,6 @@
-# AnalogExif 1.0.0 (Modernized Fork)
+# AnalogExif 1.0.0 (Qt6‑ported)
 
-This repository is a **modernized and maintained fork** of the original  
+This repository is a **Qt6-ported** of the original  
 [AnalogExif project on SourceForge](https://sourceforge.net/projects/analogexif/).
 
 AnalogExif is a tool for editing and managing EXIF metadata for **scanned film photographs**.  
