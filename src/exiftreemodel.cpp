@@ -645,7 +645,7 @@ QString ExifTreeModel::getGPSfromXmp()
 				gpsPosition = "-";
 
 			double minVal = latStrs.at(1).left(latStrs.at(1).length() - 1).toDouble();
-			double secVal = modf(minVal, NULL);
+			double secVal = modf(minVal, nullptr);
 
 			gpsPosition += QString("%1\u00B0 %2' %3\" ").arg(latStrs.at(0)).arg((int)minVal, 2, 10, QChar('0')).arg(secVal, 2, 'f', 3, QChar('0'));
 		}
@@ -677,7 +677,7 @@ QString ExifTreeModel::getGPSfromXmp()
 					gpsPosition += "-";
 
 				double minVal = longStrs.at(1).left(longStrs.at(1).length() - 1).toDouble();
-				double secVal = modf(minVal, NULL);
+				double secVal = modf(minVal, nullptr);
 
 				gpsPosition += QString("%1\u00B0 %2' %3\" ").arg(longStrs.at(0)).arg((int)minVal, 2, 10, QChar('0')).arg(secVal, 2, 'f', 3, QChar('0'));
 			}
@@ -1629,7 +1629,7 @@ void ExifTreeModel::QStringToExifUtf(Exiv2::Value& v, QString qstr, bool addUnic
 		utfData.prepend("UNICODE");
 	}
 
-	// append with end-of-string null
+	// append with end-of-string nullptr
 	// utfData.append(QByteArray(2, '\0'));
 
 	// read the value into Exiv2::Value

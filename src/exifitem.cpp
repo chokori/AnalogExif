@@ -36,7 +36,7 @@ ExifItem* ExifItem::insertChild(const QString& tag, const QString& tagText, cons
 // remove child
 bool ExifItem::removeChild(int position)
 {
-	if((position < 0) || (position > childItems.size()))
+	if((position < 0) || (position >= childItems.size()))
 		return false;
 
 	delete childItems.takeAt(position);
@@ -104,7 +104,7 @@ ExifItem* ExifItem::findTagByName(const QString& name)
 			return tag;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool ExifItem::findSetTagValueFromString(const QString& tagName, const QVariant& value, bool setDirty)

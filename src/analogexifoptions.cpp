@@ -355,7 +355,7 @@ void AnalogExifOptions::loadOptions()
 		DataIn.cbData = userPwd.length();
 		DataIn.pbData = (BYTE*)userPwd.data();
 
-		if(!CryptUnprotectData(&DataIn, NULL, NULL, NULL, NULL, 0, &DataOut))
+		if(!CryptUnprotectData(&DataIn, nullptr, nullptr, nullptr, nullptr, 0, &DataOut))
 			return;
 
 		userPwd.clear();
@@ -498,7 +498,7 @@ bool AnalogExifOptions::saveOptions()
 			DataIn.cbData = userPassword.length();
 			DataIn.pbData = (BYTE*)userPassword.data();
 
-			if(!CryptProtectData(&DataIn, L"Proxy authentication", NULL, NULL, NULL, 0, &DataOut))
+			if(!CryptProtectData(&DataIn, L"Proxy authentication", nullptr, nullptr, nullptr, 0, &DataOut))
 				return false;
 
 			userPassword.clear();
@@ -759,7 +759,7 @@ void AnalogExifOptions::setupProxy()
 			DataIn.cbData = userPwd.length();
 			DataIn.pbData = (BYTE*)userPwd.data();
 
-			if(!CryptUnprotectData(&DataIn, NULL, NULL, NULL, NULL, 0, &DataOut))
+			if(!CryptUnprotectData(&DataIn, nullptr, nullptr, nullptr, nullptr, 0, &DataOut))
 				return;
 
 			userPwd.clear();

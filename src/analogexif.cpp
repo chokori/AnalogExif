@@ -79,11 +79,11 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 	// filePreviewPixmap = new QPixmap();
 	ui.filePreview->setPixmap(filePreviewPixmap);
 
-	exifTreeModel = NULL;
-	filmsList = NULL;
-	gearList = NULL;
-	authorsList = NULL;
-	developersList = NULL;
+	exifTreeModel = nullptr;
+	filmsList = nullptr;
+	gearList = nullptr;
+	authorsList = nullptr;
+	developersList = nullptr;
 
 	// set context menus
 	QList<QAction*> contextMenus;
@@ -207,7 +207,7 @@ bool AnalogExif::initialize()
 		}
 		else if(msgBox.clickedButton() == openBtn)
 		{
-			dbName = QFileDialog::getOpenFileName(NULL, tr("Open equipment library"), QString(), tr("AnalogExif library files (*.ael);;All files (*.*)"));
+			dbName = QFileDialog::getOpenFileName(nullptr, tr("Open equipment library"), QString(), tr("AnalogExif library files (*.ael);;All files (*.*)"));
 		}
 		else if(msgBox.clickedButton() == newBtn)
 		{
