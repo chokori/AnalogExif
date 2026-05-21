@@ -24,6 +24,7 @@
 #include <QSqlDatabase>
 #include <QSettings>
 #include <QStringList>
+#include <memory>
 
 // Exiv2 includes
 #include <exiv2/image.hpp>
@@ -120,7 +121,7 @@ protected:
 
 	// read exif values into the model
 	bool readMetaValues();
-	bool readMetaValues(Exiv2::Image::UniquePtr& exivHandle);
+	bool readMetaValues(const std::shared_ptr<Exiv2::Image>& exivHandle);
 
 	bool prepareMetadata(Exiv2::ExifData& exifData, Exiv2::IptcData& iptcData, Exiv2::XmpData& xmpData);
 
@@ -160,7 +161,7 @@ protected:
 	// extra tags string
 	QString etagsString;
 
-	Exiv2::Image::UniquePtr exifHandle;
+	std::shared_ptr<Exiv2::Image> exifHandle;
 
 	Exiv2::ExifData curExifData;
 	Exiv2::IptcData curIptcData;

@@ -87,7 +87,7 @@ void ExifTreeModel::clear(bool deleteObj)
 	curXmpData.clear();
 
 	if(deleteObj)
-		delete exifHandle.release();
+		exifHandle.reset();
 
 	resetDirty();
 }
@@ -142,12 +142,12 @@ bool ExifTreeModel::openFile(QString filename)
 	try
 	{
 		// open file using Exiv2 library
-		exifHandle = Exiv2::ImageFactory::open(filename.toStdString());
+		auto uniqueHandle = Exiv2::ImageFactory::open(filename.toStdString());
+		if(!uniqueHandle)
+			return false;
+		exifHandle = std::shared_ptr<Exiv2::Image>(uniqueHandle.release());
 
-
-
-
-		if(exifHandle.get() == 0)
+		if(!exifHandle || !exifHandle->good())
 			return false;
 		// read metadata
 		exifHandle->readMetadata();
@@ -1112,10 +1112,10 @@ void ExifTreeModel::processTag(ExifItem* tag, Exiv2::ExifData& exifData, Exiv2::
 	tag->setValue(tagValue);
 }
 
-bool ExifTreeModel::readMetaValues(Exiv2::Image::UniquePtr& exivHandle)
+bool ExifTreeModel::readMetaValues(const std::shared_ptr<Exiv2::Image>& exivHandle)
 {
 	// check for empty image
-	if(!exivHandle.get())
+	if(!exivHandle)
 		return true;
 
 	// re-read metadata
@@ -1746,9 +1746,10 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 {
 	try
 	{
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
+		auto uniqueImage = Exiv2::ImageFactory::open(filename.toStdString());
+		auto image = std::shared_ptr<Exiv2::Image>(uniqueImage.release());
 
-	    if((image.get() == nullptr) || (!image->good()))
+	    if(!image || !image->good())
 			return false;
 
 		// replace image metadata
@@ -1826,33 +1827,26 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 
 QByteArray ExifTreeModel::getPreview() const
 {
-	if(!exifHandle || !exifHandle->good())
-		return QByteArray();
+    auto localHandle = exifHandle;
+    if (!localHandle || !localHandle->good())
+        return QByteArray();
 
-	try {
-		// load preview
-		Exiv2::PreviewManager preview(*exifHandle);
-		Exiv2::PreviewPropertiesList previews = preview.getPreviewProperties();
+    try {
+        Exiv2::PreviewManager preview(*localHandle);
+        auto previews = preview.getPreviewProperties();
+        if (previews.empty()) return QByteArray();
 
-		if (previews.empty())
-			return QByteArray();
-
-		// choose the smallest supported required preview
-		QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
-
-		for (const auto& prop : previews) {
-			if (supportedImgs.contains(QString::fromStdString(prop.extension_).remove(".").toLatin1()))
-			{
-				const Exiv2::PreviewImage& img = preview.getPreviewImage(prop);
-				return QByteArray(reinterpret_cast<const char*>(img.pData()), static_cast<int> (prop.size_));
-			}
-		}
-	}
-	catch (const Exiv2::Error& e) {
-		qDebug() << "Exiv2 Preview Error:" << e.what();
-	}
-
-	return QByteArray();
+        QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
+        for (const auto& prop : previews) {
+            if (supportedImgs.contains(QString::fromStdString(prop.extension_).remove(".").toLatin1())) {
+                const Exiv2::PreviewImage& img = preview.getPreviewImage(prop);
+                return QByteArray(reinterpret_cast<const char*>(img.pData()), static_cast<int>(prop.size_));
+            }
+        }
+    } catch (const Exiv2::Error& e) {
+        qDebug() << "Exiv2 Preview Error:" << e.what();
+    }
+    return QByteArray();
 }
 
 // clears dirty flag from all tags
@@ -2060,9 +2054,10 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 
 	try
 	{
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
+		auto uniqueImage = Exiv2::ImageFactory::open(filename.toStdString());
+		auto image = std::shared_ptr<Exiv2::Image>(uniqueImage.release());
 
-	    if((image.get() == 0) || (!image->good()))
+	    if(!image || !image->good())
 			return false;
 
 		// read meta data
@@ -2106,9 +2101,10 @@ bool ExifTreeModel::mergeMetadata(QString filename, QVariantList metadata)
 
 	try
 	{
-		Exiv2::Image::UniquePtr image = Exiv2::ImageFactory::open(filename.toStdString());
+		auto uniqueImage = Exiv2::ImageFactory::open(filename.toStdString());
+		auto image = std::shared_ptr<Exiv2::Image>(uniqueImage.release());
 
-	    if((image.get() == 0) || (!image->good()))
+	    if(!image || !image->good())
 			return false;
 
 		// read meta data

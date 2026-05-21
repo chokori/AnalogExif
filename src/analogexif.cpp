@@ -117,7 +117,7 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 
 #ifndef Q_OS_MACOS
 	// connect preview updates
-	connect(this, &AnalogExif::updatePreview, this, &AnalogExif::previewUpdate, Qt::BlockingQueuedConnection);
+	connect(this, &AnalogExif::updatePreview, this, &AnalogExif::previewUpdate, Qt::QueuedConnection);
 #endif
 
 	contextMenus.clear();
@@ -671,42 +671,27 @@ void AnalogExif::openLocation(QString path)
 // background preview loader
 void AnalogExif::loadPreview(QString filename)
 {
-	// show file preview and details
+    QImage img;
+    QByteArray preview = exifTreeModel->getPreview();
+    if(!preview.isEmpty()) {
+        img.loadFromData(preview);
+    } else {
+        QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
+        if(!supportedImgs.contains(filename.section(".", -1).toLatin1()))
+            return;
+        img.load(filename);
+    }
+    if(img.isNull()) return;
 
-	// try to load preview
-	QByteArray preview = exifTreeModel->getPreview();
-	if(!preview.isEmpty())
-	{
-		filePreviewPixmap.loadFromData(preview, 0, Qt::ThresholdDither | Qt::NoFormatConversion);
-	}
-	else
-	{
-		// check whether image is supported
-		QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
-
-		if(!supportedImgs.contains(filename.section(".", -1).toLatin1()))
-			return;
-
-		// show the full image otherwise
-		if(!filePreviewPixmap.load(filename, 0, Qt::ThresholdDither | Qt::NoFormatConversion))
-			return;
-	}
-
-	QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
-
-	filePreviewPixmap = filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-#ifdef Q_OS_MACOS
-        // preview is loaded on the same thread under Mac
-        previewUpdate();
-#else
-	emit updatePreview();
-#endif
+    // do NOT access ui.* or QPixmap here
+    emit previewUpdate(img);
 }
 
-void AnalogExif::previewUpdate()
+void AnalogExif::previewUpdate(const QImage& img)
 {
-	ui.filePreview->setPixmap(filePreviewPixmap);
+    QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
+    QPixmap pm = QPixmap::fromImage(img).scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui.filePreview->setPixmap(pm);
 }
 
 // on main window resize event

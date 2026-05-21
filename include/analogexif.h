@@ -23,6 +23,7 @@
 #include <QMainWindow>
 #include <QFileSystemModel>
 #include <QPixmap>
+#include <QImage>
 #include <QSqlDatabase>
 #include <QSettings>
 #include <QCloseEvent>
@@ -174,7 +175,7 @@ private:
 	static const QUrl helpUrl;
 
 signals:
-	void updatePreview();
+	void updatePreview(const QImage &img);
 
 private slots:
 	// Apply changes clicked
@@ -238,8 +239,8 @@ private slots:
 	// help
 	void on_actionHelp_triggered(bool checked = false);
 
-	// on update preview
-	void previewUpdate();
+	// update preview with image delivered from worker thread
+	void previewUpdate(const QImage &img);
 
 	// new version available
 	void newVersionAvailable(QString selfTag, QString newTag, QDateTime newTime, QString newSummary);

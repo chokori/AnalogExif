@@ -68,3 +68,5 @@ AnalogExif.vcproj*
 AnalogExif.vcxproj*
 .qmake.stash
 CMakeUserPresets.json
+/out
+.vscode
