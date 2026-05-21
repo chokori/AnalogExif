@@ -23,7 +23,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "ui")
 set(CMAKE_AUTORCC_SEARCH_PATHS "res")
 
 # Qt 6.11 modules
-find_package(Qt6 6.11.0 REQUIRED COMPONENTS
+find_package(Qt6 6.11.1 REQUIRED COMPONENTS
     Widgets
     Network
     Sql

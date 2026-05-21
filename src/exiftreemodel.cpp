@@ -58,7 +58,7 @@ ExifTreeModel::ExifTreeModel(QObject *parent) : QAbstractItemModel(parent)
 	}
 	catch(Exiv2::Error& exc)
 	{
-		QMessageBox::critical(NULL, tr("Error registering AnalogExif XMP schema"), tr("Unable to register AnalogExif XMP schema.\n\n%1.").arg(exc.what()), QMessageBox::Ok);
+		QMessageBox::critical((QWidget*)nullptr, tr("Error registering AnalogExif XMP schema"), tr("Unable to register AnalogExif XMP schema.\n\n%1.").arg(exc.what()), QMessageBox::Ok);
 	}
 
 	// create and read the values of the used metatags
@@ -502,8 +502,9 @@ QVariant ExifTreeModel::processItemData(const ExifItem *item, const QVariant& va
 	case ExifItem::TagDateTime:
 		return value.toDateTime().toString("yyyy:MM:dd HH:mm:ss");
 		break;
-        default:
-                break;
+        
+	default:
+		break;
 	}
 
 	ok = false;
@@ -569,7 +570,7 @@ void ExifTreeModel::populateModel()
 	QSqlQuery query("SELECT a.GearType, b.TagName, b.TagText, b.PrintFormat, b.TagType, b.Flags, b.AltTag FROM GearTemplate a, MetaTags b WHERE b.id=a.TagId ORDER BY a.GearType, a.OrderBy");
 
 	int curCategoryId = -1, nRows = 0;
-	ExifItem* headerItem = NULL;
+	ExifItem* headerItem = nullptr;
 
 	while(query.next())
 	{
@@ -627,7 +628,6 @@ QString ExifTreeModel::getGPSfromXmp()
 		QStringList latStrs = latitude.split(QChar(','));
 		if(latStrs.count() == 3)
 		{
-			//if(latStrs.at(2).at(latStrs.at(2).length() - 1) == 'N')
 			if(latStrs.at(2).length() > 0 && latStrs.at(2).at(latStrs.at(2).length() -1 ) == 'N')
 				gpsPosition = "+";
 			else
@@ -645,7 +645,6 @@ QString ExifTreeModel::getGPSfromXmp()
 				gpsPosition = "-";
 
 			double minVal = latStrs.at(1).left(latStrs.at(1).length() - 1).toDouble();
-
 			double secVal = modf(minVal, NULL);
 
 			gpsPosition += QString("%1\u00B0 %2' %3\" ").arg(latStrs.at(0)).arg((int)minVal, 2, 10, QChar('0')).arg(secVal, 2, 'f', 3, QChar('0'));
@@ -678,7 +677,6 @@ QString ExifTreeModel::getGPSfromXmp()
 					gpsPosition += "-";
 
 				double minVal = longStrs.at(1).left(longStrs.at(1).length() - 1).toDouble();
-
 				double secVal = modf(minVal, NULL);
 
 				gpsPosition += QString("%1\u00B0 %2' %3\" ").arg(longStrs.at(0)).arg((int)minVal, 2, 10, QChar('0')).arg(secVal, 2, 'f', 3, QChar('0'));
@@ -852,14 +850,15 @@ QVariant ExifTreeModel::readTagValue(QString tagNames, int& srcTagType, ExifItem
 
 	for(const QString& tagName: tags)
 	{
-		QString tagType = tagName.split(".").at(0);
+		QStringList tagParts = tagName.split(".");
+		if (tagParts.isEmpty())
+			continue;
+		QString tagType = tagParts.at(0);
 		if(tagType == "Exif")
 		{
 			// Exif data
-			
 			// search for the key
 			Exiv2::ExifKey exifKey(tagName.toStdString());
-
 			Exiv2::ExifData::const_iterator pos = exifData.findKey(exifKey);
 
 			if(pos == exifData.end())
@@ -1179,9 +1178,6 @@ void ExifTreeModel::repopulate()
 	beginResetModel();
 	endResetModel();
 	populateModel();
-	// reload information if file was open
-	/*if(editable)
-		reload();*/
 }
 
 bool ExifTreeModel::parseGPSString(QString gpsStr, QString& latRef, int& latDeg, int& latMin, double& latSec, QString& lonRef, int& lonDeg, int& lonMin, double& lonSec)
@@ -1828,35 +1824,35 @@ bool ExifTreeModel::saveFile(QString filename, bool overwrite)
 	return true;
 }
 
-QByteArray* ExifTreeModel::getPreview() const
+QByteArray ExifTreeModel::getPreview() const
 {
 	if(!exifHandle || !exifHandle->good())
-		return NULL;
+		return QByteArray();
 
 	try {
 		// load preview
 		Exiv2::PreviewManager preview(*exifHandle);
-
 		Exiv2::PreviewPropertiesList previews = preview.getPreviewProperties();
 
 		if (previews.empty())
-			return NULL;
+			return QByteArray();
 
 		// choose the smallest supported required preview
 		QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
 
-		for (Exiv2::PreviewPropertiesList::iterator i = previews.begin(); i < previews.end(); i++)
-		{
-			if (supportedImgs.contains(QString::fromStdString(i->extension_).remove(".").toLatin1()))
-				return new QByteArray((const char*)preview.getPreviewImage(*i).pData(), i->size_);
+		for (const auto& prop : previews) {
+			if (supportedImgs.contains(QString::fromStdString(prop.extension_).remove(".").toLatin1()))
+			{
+				const Exiv2::PreviewImage& img = preview.getPreviewImage(prop);
+				return QByteArray(reinterpret_cast<const char*>(img.pData()), static_cast<int> (prop.size_));
+			}
 		}
 	}
 	catch (const Exiv2::Error& e) {
 		qDebug() << "Exiv2 Preview Error:" << e.what();
-		return NULL;
 	}
 
-	return NULL;
+	return QByteArray();
 }
 
 // clears dirty flag from all tags
@@ -2097,7 +2093,7 @@ bool ExifTreeModel::setExposureNumber(QString filename, int exposure)
 	}
 	catch (Exiv2::Error& err)
 	{
-		qDebug("AnalogExif: ExifTreeModel::setExposureNumber() Exiv2 exception (%d) = %s", err.code(), err.what());
+		qDebug() << "AnalogExif: ExifTreeModel::setExposureNumber() Exiv2 exception : " << err.what();
 		return false;
 	}
 

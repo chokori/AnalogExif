@@ -68,7 +68,7 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const
 	{
-                Q_UNUSED(parent);
+		Q_UNUSED(parent);
 
 		// tag and its value
 		return 2;
@@ -99,7 +99,7 @@ public:
 		editable = !ro;
 	}
 
-	 QByteArray* getPreview() const;
+	 QByteArray getPreview() const;
 
 	// Exif UTF-QString conversion
 	static Exiv2::Value::UniquePtr QStringToExifUtf(QString qstr, bool addUnicodeMarker = false, bool isUtf8 = false, Exiv2::TypeId typeId = Exiv2::unsignedByte);

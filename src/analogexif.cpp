@@ -674,11 +674,10 @@ void AnalogExif::loadPreview(QString filename)
 	// show file preview and details
 
 	// try to load preview
-	QByteArray* preview = exifTreeModel->getPreview();
-	if(preview)
+	QByteArray preview = exifTreeModel->getPreview();
+	if(!preview.isEmpty())
 	{
-		filePreviewPixmap.loadFromData(*preview, 0, Qt::ThresholdDither | Qt::NoFormatConversion);
-		delete preview;
+		filePreviewPixmap.loadFromData(preview, 0, Qt::ThresholdDither | Qt::NoFormatConversion);
 	}
 	else
 	{
