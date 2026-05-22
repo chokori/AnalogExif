@@ -525,12 +525,13 @@ void AnalogExif::fileView_selectionChanged(const QItemSelection&, const QItemSel
 			// load preview in the background
 			ui.filePreview->setPixmap(QPixmap());
 #ifdef Q_OS_MACOS
-            // Background loading doesn't work properly for Mac
-            QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-            loadPreview(curFileName);
-            QApplication::restoreOverrideCursor();
+			// Background loading doesn't work properly for Mac
+			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+			loadPreview(curFileName, ui.filePreviewGroupBox->contentsRect().size());
+			QApplication::restoreOverrideCursor();
 #else
-			QFuture<void> future = QtConcurrent::run(&AnalogExif::loadPreview, this, curFileName);
+			QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
+			QFuture<void> future = QtConcurrent::run(&AnalogExif::loadPreview, this, curFileName, previewSize);
 #endif
 			exifTreeModel->setReadonly(false);
 
@@ -637,12 +638,13 @@ void AnalogExif::openLocation(QString path)
 		// load preview in the background
 		ui.filePreview->setPixmap(QPixmap());
 #ifdef Q_OS_MACOS
-		// Background loading doesn't work properly for Mac
-		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-		loadPreview(curFileName);
-		QApplication::restoreOverrideCursor();
+	// Background loading doesn't work properly for Mac
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	loadPreview(curFileName, ui.filePreviewGroupBox->contentsRect().size());
+	QApplication::restoreOverrideCursor();
 #else
-		QFuture<void> future = QtConcurrent::run(&AnalogExif::loadPreview, this, curFileName);
+	QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
+	QFuture<void> future = QtConcurrent::run(&AnalogExif::loadPreview, this, curFileName, previewSize);
 #endif
 		// directory index
 		curDirIndex = dirSorter->mapFromSource(dirViewModel->index(fileInfo.path()));
@@ -668,30 +670,38 @@ void AnalogExif::openLocation(QString path)
 	ui.fileView->scrollTo(previewIndex, QAbstractItemView::PositionAtCenter);
 }
 
-// background preview loader
-void AnalogExif::loadPreview(QString filename)
+// background preview loader (scales in worker)
+void AnalogExif::loadPreview(QString filename, QSize targetSize)
 {
-    QImage img;
-    QByteArray preview = exifTreeModel->getPreview();
-    if(!preview.isEmpty()) {
-        img.loadFromData(preview);
-    } else {
-        QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
-        if(!supportedImgs.contains(filename.section(".", -1).toLatin1()))
-            return;
-        img.load(filename);
-    }
-    if(img.isNull()) return;
+	QImage img;
+	QByteArray preview = exifTreeModel->getPreview();
+	if(!preview.isEmpty()) {
+		img.loadFromData(preview);
+	} else {
+		QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
+		if(!supportedImgs.contains(filename.section(".", -1).toLatin1()))
+			return;
+		img.load(filename);
+	}
+	if(img.isNull()) return;
 
-    // do NOT access ui.* or QPixmap here
-    emit previewUpdate(img);
+	// scale in worker to reduce UI-thread work and perceived delay
+	if(!targetSize.isEmpty()) {
+		int w = qMax(0, targetSize.width() - 30);
+		int h = qMax(0, targetSize.height() - 30);
+		img = img.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+
+	emit updatePreview(img);
 }
 
 void AnalogExif::previewUpdate(const QImage& img)
 {
-    QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
-    QPixmap pm = QPixmap::fromImage(img).scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    ui.filePreview->setPixmap(pm);
+	// store original pixmap (already scaled in worker to target size)
+	filePreviewPixmap = QPixmap::fromImage(img);
+
+	// set pixmap directly; resizeEvent will rescale when UI size changes
+	ui.filePreview->setPixmap(filePreviewPixmap);
 }
 
 // on main window resize event

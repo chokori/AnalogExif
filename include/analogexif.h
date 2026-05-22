@@ -141,8 +141,8 @@ private:
 	// create new database
 	QString createLibrary(QWidget* parent = 0, QString dir = QString());
 
-	// background preview loader
-	void loadPreview(QString filename);
+	// background preview loader (filename, target preview size)
+	void loadPreview(QString filename, QSize targetSize);
 
 	// open specified location
 	void openLocation(QString path);
