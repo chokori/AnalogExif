@@ -21,6 +21,7 @@
 #define ANALOGEXIF_H
 
 #include <QMainWindow>
+#include <QAbstractItemView>
 #include <QFileSystemModel>
 #include <QPixmap>
 #include <QImage>
@@ -61,8 +62,6 @@ private:
 	// directory model
 	QFileSystemModel* fileViewModel;
 	QFileSystemModel* dirViewModel;
-	// pixmap to hold file preview
-	QPixmap filePreviewPixmap;
 	// custom directory sorter
 	DirSortFilterProxyModel* fileSorter;
 	DirSortFilterProxyModel* dirSorter;
@@ -159,6 +158,9 @@ private:
 	// query user if dirty model, and save if asked
 	bool checkForDirty();
 
+	//check dirty and restore previous selection on cancel
+	bool checkDirtyAndResotre(QAbstractItemView* view, const QModelIndex& prevIndex);
+
 	// open the file in the shell
 	void openExternal(const QModelIndex& index);
 
@@ -174,8 +176,13 @@ private:
 
 	static const QUrl helpUrl;
 
+	//original preview image(cached, full)
+	QImage filePreviewImageOriginal;
+
+	void applyPreviewForSize(const QSize &contentSize);
+
 signals:
-	void updatePreview(const QImage &img);
+	void updatePreview();
 
 private slots:
 	// Apply changes clicked
@@ -240,7 +247,7 @@ private slots:
 	void on_actionHelp_triggered(bool checked = false);
 
 	// update preview with image delivered from worker thread
-	void previewUpdate(const QImage &img);
+	void previewUpdate();
 
 	// new version available
 	void newVersionAvailable(QString selfTag, QString newTag, QDateTime newTime, QString newSummary);

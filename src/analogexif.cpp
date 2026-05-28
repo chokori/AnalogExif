@@ -76,8 +76,7 @@ AnalogExif::AnalogExif(QWidget *parent, Qt::WindowFlags flags)
 	ui.fileView->setModel(fileSorter);
 
 	// set file preview
-	// filePreviewPixmap = new QPixmap();
-	ui.filePreview->setPixmap(filePreviewPixmap);
+	ui.filePreview->setPixmap(QPixmap());
 
 	exifTreeModel = nullptr;
 	filmsList = nullptr;
@@ -163,7 +162,6 @@ AnalogExif::~AnalogExif()
 	delete fileSorter;
 	delete fileViewModel;
 	delete verChecker;
-	// delete filePreviewPixmap;
 }
 
 // perform all initialization
@@ -368,8 +366,7 @@ void AnalogExif::dirView_selectionChanged(const QItemSelection& selected, const 
 
 			return;
 		}
-
-		if(result == QMessageBox::Save)
+		else if(result == QMessageBox::Save)
 			if(!save())
 				return;
 
@@ -673,47 +670,93 @@ void AnalogExif::openLocation(QString path)
 // background preview loader (scales in worker)
 void AnalogExif::loadPreview(QString filename, QSize targetSize)
 {
-	QImage img;
+	QImage orig;
 	QByteArray preview = exifTreeModel->getPreview();
 	if(!preview.isEmpty()) {
-		img.loadFromData(preview);
+		orig.loadFromData(preview);
 	} else {
-		QList<QByteArray> supportedImgs = QImageReader::supportedImageFormats();
-		if(!supportedImgs.contains(filename.section(".", -1).toLatin1()))
+		QImageReader reader(filename);
+		if(!reader.canRead()) {
 			return;
-		img.load(filename);
-	}
-	if(img.isNull()) return;
+		}
 
-	// scale in worker to reduce UI-thread work and perceived delay
-	if(!targetSize.isEmpty()) {
-		int w = qMax(0, targetSize.width() - 30);
-		int h = qMax(0, targetSize.height() - 30);
-		img = img.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		int imageCount = reader.imageCount();
+
+		if(imageCount <=1){
+			orig.load(filename);
+		}
+		else {
+			int checkCount = qMin(2,imageCount);
+			QSize bestSize(0,0);
+			int bestIndex = 0;
+
+			for (int i = 0; i < checkCount; i++) {
+				reader.jumpToImage(i);
+				QSize size = reader.size();
+				if (!size.isValid()) {
+					QImage tmp = reader.read();
+					if (!tmp.isNull()) {
+						size = tmp.size();
+					}
+					//reader.reset();
+				} 
+				
+				if(size.width() * size.height() > bestSize.width() * bestSize.height()) {
+					bestSize = size;
+					bestIndex = i;
+				}
+			}
+
+			reader.jumpToImage(bestIndex);
+			orig = reader.read();
+		}
 	}
 
-	emit updatePreview(img);
+	if (orig.isNull()) {
+		return;
+	}
+
+	QMetaObject::invokeMethod(this, [this, orig]() {
+		this->filePreviewImageOriginal = orig;
+		}, Qt::BlockingQueuedConnection);
+
+	emit updatePreview();
 }
 
-void AnalogExif::previewUpdate(const QImage& img)
+void AnalogExif::previewUpdate()
 {
-	// store original pixmap (already scaled in worker to target size)
-	filePreviewPixmap = QPixmap::fromImage(img);
-
-	// set pixmap directly; resizeEvent will rescale when UI size changes
-	ui.filePreview->setPixmap(filePreviewPixmap);
+	applyPreviewForSize(ui.filePreviewGroupBox->contentsRect().size());
 }
-
 // on main window resize event
 void AnalogExif::resizeEvent(QResizeEvent *)
 {
-	// rescale the pixmap
-	if(!ui.filePreview->pixmap().isNull())
-	{
-		QSize previewSize = ui.filePreviewGroupBox->contentsRect().size();
-		ui.filePreview->setPixmap(filePreviewPixmap.scaled(previewSize.width()-30, previewSize.height()-30, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-	}
+	if(ui.filePreview->pixmap().isNull())
+		return;
+
+	applyPreviewForSize(ui.filePreviewGroupBox->contentsRect().size());
+
 }
+
+void AnalogExif::applyPreviewForSize(const QSize &contentSize)
+{
+	if (filePreviewImageOriginal.isNull()) {
+		return;
+	}
+
+	int w = qMax(1, contentSize.width() -30);
+	int h = qMax(1, contentSize.height() -30);
+
+	qreal dpr = QGuiApplication::primaryScreen() ? QGuiApplication::primaryScreen()->devicePixelRatio() : 1.0;
+
+	int dw = qMax(1, int(w * dpr));
+	int dh = qMax(1, int(h * dpr));
+
+	QImage scaled = filePreviewImageOriginal.scaled(dw, dh, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	QPixmap pm = QPixmap::fromImage(scaled);
+	pm.setDevicePixelRatio(dpr);
+	ui.filePreview->setPixmap(pm);
+}
+
 
 // apply changes
 void AnalogExif::on_applyChangesBtn_clicked()
@@ -762,37 +805,6 @@ bool AnalogExif::createBackup(QString filename, bool singleFile, QMessageBox::St
 				}
 			}
 		}
-#if 0
-		if((res == QMessageBox::Yes) || (res == QMessageBox::YesToAll))
-		{
-			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-			QElapsedTimer timer;
-			ProgressDialog progress(tr("Creating backup"), tr("Please wait..."), "", this, 0, 100);
-			QFuture<bool> future = QtConcurrent::run(QFile::copy, filename, filename + ".bak");
-			progress.setValue(0);
-
-			while(!future.isFinished())
-			{
-				if((timer.elapsed() > 500) && (!progress.isVisible()))
-					progress.show();
-
-				progress.setValue(timer.elapsed() / 1000);
-
-				QCoreApplication::processEvents();
-				QCoreApplication::sendPostedEvents();
-			}
-
-			QApplication::restoreOverrideCursor();
-
-			if(!future)
-			{
-				QMessageBox::critical(this, tr("Save error"), tr("Unable to create backup file:\n%1.").arg(QDir::toNativeSeparators(filename + ".bak")));
-	
-				return false;
-			}
-		}
-#endif
 		if ((res == QMessageBox::Yes) || (res == QMessageBox::YesToAll))
 		{
 			QApplication::setOverrideCursor(Qt::WaitCursor);
