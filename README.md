@@ -1,4 +1,4 @@
-# AnalogExif 1.0.0 (Qt6‑ported)
+# AnalogExif 1.0.1 (Qt6‑ported)
 
 This repository is a **Qt6-ported** of the original  
 [AnalogExif project on SourceForge](https://sourceforge.net/projects/analogexif/).
@@ -73,7 +73,7 @@ This project uses **CMake** and **CPack** to generate a Windows installer (.exe)
 
 1. **Clone the repository**
 ```
-git clone [https://github.com/chokori/AnalogExif.git](https://github.com/chokori/AnalogExif.git)
+git clone https://github.com/chokori/AnalogExif.git
 cd AnalogExif
 git submodule update --init --recursive
 ```

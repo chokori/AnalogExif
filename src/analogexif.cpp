@@ -460,8 +460,7 @@ void AnalogExif::fileView_selectionChanged(const QItemSelection&, const QItemSel
 
 				return;
 			}
-
-			if(result == QMessageBox::Save)
+			else if(result == QMessageBox::Save)
 				if(!save())
 					return;
 

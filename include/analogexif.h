@@ -158,9 +158,6 @@ private:
 	// query user if dirty model, and save if asked
 	bool checkForDirty();
 
-	//check dirty and restore previous selection on cancel
-	bool checkDirtyAndResotre(QAbstractItemView* view, const QModelIndex& prevIndex);
-
 	// open the file in the shell
 	void openExternal(const QModelIndex& index);
 

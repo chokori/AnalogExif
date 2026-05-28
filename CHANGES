@@ -1,4 +1,7 @@
-Change from 0.0.4
+Change from 1.0.1
+* BugFix preview
+
+Change from 1.0.0
 * QT6, EXiv2, Cmake
 
 Changes from 0.0.4 (build 5 Windows)
